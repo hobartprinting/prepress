@@ -15,3 +15,9 @@ Link to Ghostscript https://www.ghostscript.com/releases/index.html  (download G
 Link to Imagemagick https://imagemagick.org/index.php
 Link to potrace https://potrace.sourceforge.net/#downloading
 
+On all window installs make sure that they are all in the Path in Environmental Settings.
+Example:
+For windows add to Path variables - Example:  C:\Program Files\gs\gs9.23\bin;C:\Program Files\gs\gs9.23\lib
+
+To set vairable in Windows:
+Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
