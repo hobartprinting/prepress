@@ -1,0 +1,1 @@
+printer inkjet-volume-based description {Cost unit in ml of ink - calculate volume of ink} kind {Ink Jet} cyan_unit 70 cyan_yield 2566 cyan_percent 5 magenta_unit 70 magenta_yield 2566 magenta_percent 5 yellow_unit 70 yellow_yield 2566 yellow_percent 5 black_unit 130 black_yield 6000 black_percent 5 spot_unit 0 spot_yield 0 spot_percent 0
