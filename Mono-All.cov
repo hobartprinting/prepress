@@ -1,1 +1,0 @@
-printer Mono-All description {All consumables} kind {Mono Toner} black_toner_unit 90 black_toner_yield 15000 black_toner_percent 5 black_drum_unit 100 black_drum_yield 15000 black_drum_percent 5 transfer_belt_unit 200 transfer_belt_yield 30000 transfer_belt_percent 5 fuser_unit 300 fuser_yield 30000 fuser_percent 5 waste_unit 20 waste_yield 5000 waste_percent 0
