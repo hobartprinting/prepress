@@ -1,5 +1,5 @@
 # prepress
-Note: The BSD only applies to the files prepress-main.tcl, prepress-printers.tcl, and files in msgs directory. TCL/TK, Ghostscript, Imagemagick, Tablelist all have their own copywrites.
+Note: The BSD3 clause only applies to the files prepress-main.tcl, prepress-printers.tcl, and files in msgs directory. TCL/TK, Ghostscript, Imagemagick, Tablelist all have their own copywrites.
 
 Utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 
