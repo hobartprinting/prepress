@@ -21,3 +21,4 @@ For windows add to Path variables - Example:  C:\Program Files\gs\gs9.23\bin;C:\
 
 To set vairable in Windows:
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
+To test: in cmd shell type 'where potrace' or 'where gswin64c'
