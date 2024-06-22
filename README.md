@@ -22,3 +22,7 @@ For windows add to Path variables - Example:  C:\Program Files\gs\gs9.23\bin;C:\
 To set vairable in Windows:
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
 To test: in cmd shell type 'where potrace' or 'where gswin64c'
+
+To run prepress download files in main branch, place prepress folder in directory, then in cmd shell go to that dir and type 'tclsh prepress-main.tcl
+
+On Windows you can also open the magicsplat Tk GUI console and then open the source file from there 'prepress-main.tcl'
