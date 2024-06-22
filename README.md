@@ -23,7 +23,7 @@ To set vairable in Windows:
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
 To test: in cmd shell type 'where potrace' or 'where gswin64c'
 
-To run prepress download released files, place prepress folder in directory, then open cmd shell; change to correct directory; and type 'tclsh prepress-main.tcl
-Another idea is to create a batch file to double click and lanunch.
+To run prepress; download released files, place prepress folder in directory, then open cmd shell; change to correct directory;  type 'tclsh prepress-main.tcl
+Another idea is to create a batch file and double click to launch application (script).
 
 On Windows you can also open the magicsplat Tk GUI console and then open the source file from there 'prepress-main.tcl'
