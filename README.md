@@ -10,7 +10,7 @@ If installing on Windows: ghostscipt, imagemagick and the TCL environment must b
 
 Links to TCL/TK https://www.magicsplat.com https://www.magicsplat.com/tcl-installer/
 
-Link to Ghostscript https://github.com/ArtifexSoftware/ghostpdl-downloads/
+Link to Ghostscript https://www.ghostscript.com/releases/index.html
 
 Link to Imagemagick https://imagemagick.org/index.php
 
