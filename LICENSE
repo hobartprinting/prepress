@@ -1,6 +1,8 @@
 BSD 3-Clause License
 
-Copyright (c) 2024, hobartprinting
+Copyright (c) 2008, Randall Hobart , hobartprinting
+A derived work of InkCoverage; a mac only program.
+Tcl.Tk version began 12-27-2019
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
