@@ -13,5 +13,5 @@ Links to TCL/TK https://www.magicsplat.com https://www.magicsplat.com/tcl-instal
 Link to Ghostscript https://www.ghostscript.com/releases/index.html  (download Ghostscript - 64 bit if possible)
 
 Link to Imagemagick https://imagemagick.org/index.php
-Link to potrace https://potrace.sourceforge.net/faq.html
+Link to potrace https://potrace.sourceforge.net/#downloading
 
