@@ -6,7 +6,7 @@ Utility to help fine tune, convert, measure coverage, or inspect files that will
 This is a tcl/tk script that steers ghostscript and imagemagick to help prepare files for print.
 It could be defined as a command or action center.
 
-If installing on Windows: ghostscipt, imagemagick and the TCL environment must be installed. If possible potrace.
+If installing on Windows: ghostscript, imagemagick and the TCL environment must be installed. If possible potrace.
 
 Links to TCL/TK https://www.magicsplat.com https://www.magicsplat.com/tcl-installer/
 
