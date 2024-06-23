@@ -26,4 +26,4 @@ To test: in cmd shell type 'where potrace' or 'where gswin64c'
 To run prepress; download released files, place prepress folder in directory, then open cmd shell; change to correct directory;  type 'tclsh prepress-main.tcl
 Another idea is to create a batch file and double click to launch application (script).
 
-On Windows you can also open the magicsplat Tk GUI console and then open the source file from there 'prepress-main.tcl'
+On Windows you can also open the magicsplat Tk GUI console and then open the source file from the menu "File->Source' and chose 'prepress-main.tcl'
