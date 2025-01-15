@@ -8,19 +8,23 @@ This application/script is an action center that makes it easy to use opensource
 The actions (or commands) that we use in print production are in the application already.
 
 Link to Ghostscript https://www.ghostscript.com/releases/index.html  (download Ghostscript - 64 bit if possible)
+	Click on link that says Ghostscript - https://www.ghostscript.com/releases/gsdnld.html
 Link to Imagemagick https://imagemagick.org/index.php
 Link to potrace https://potrace.sourceforge.net/#downloading
 
 # WINDOWS
-A tcl/tk needs to be downloaded if not present. My favorite for windows install to tcl/tk is magicsplat.
+A tcl/tk needs to be downloaded if not present. My favorite for windows tcl/tk is magicsplat.
 It comes with the full environment with many extensions.
 
 Link to TCL/TK https://www.magicsplat.com/tcl-installer/  (see download link)
-If you have windows7 or greater; get the latest version of tcl - tcl-9.01 x64 , get x86 fpr 32 bit.
+If you have windows7 or greater; get the latest version of tcl - tcl-9.01 x64 , get x86 for 32 bit.
+This has been also been tested on 8.6 versions of tcl/tk with success.
 
 Make sure on that the installs of ghostscript and Imagemagick are in the Path in Environmental Settings after installing.
 Example:
 Path variables -  C:\Program Files\gs\gs9.23\bin;C:\Program Files\gs\gs9.23\lib
+
+01-15-2025  
 
 To set Path variables in Windows:
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
