@@ -1,5 +1,7 @@
 # Prepress
-Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. TCL/TK, Ghostscript, Imagemagick, Tablelist all have their own copywrites.
+Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
+
+TCL/TK, Ghostscript, Imagemagick, Tablelist all have their own copywrites.
 
 Utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 
@@ -8,16 +10,22 @@ Utility to help fine tune, convert, measure coverage, or inspect files that will
    - running the script/app
 2. Ghostscript
    - used in rastering  pdf,ps,eps to grayscale tiff separations in c m y k and spot color.
+   - used with imagemagick in coverting an image to a pdf retaining its dpi and color model
    - used in converting postscript to pdf
-   - used in converting pdf to postscript
-   - used in converting pdf to grayscale pdf
-   - used in determining cmyk Ink Coverage of pdf or ps files
-     - and applying the coverage to a printer profile to calculate costs, or volume of ink
+   - used in converting pdf to a postscript
+   - used in converting pdf to a grayscale pdf
+   - used in determining cmyk Ink Coverage of a pdf or ps file
+     - and then applying the coverage to a printer profile to calculate costs, or volume of ink
+     - **ghostscript all that is needed when using the Ink Coverage portion**
 3. Imagemagick
+   - used with ghostscript in coverting an image into a pdf retaining its dpi and color model
+4. java 8 or above - used for inspection of pdf's using pdfbox (http://www.apache.org/licenses/)
+5. potrace - in the creation of vectors from a bitmap
+5. pdfbox - shows the cropbox, mediabox and trimbox data
 
-Optional
-4. java 8 or above - used for inspection of pdf's using pdfbox
-5. potrace - for creating vectors
+When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
+Therefore not all of the above requirements need to be present.
+
 A tcl/tk needs to be downloaded if not present. My favorite for windows tcl/tk is magicsplat.
 
 This application/script makes it easy to use opensource commands without escaping as when using a shell.
@@ -32,9 +40,9 @@ Link to potrace https://potrace.sourceforge.net/#downloading
 
 It comes with the full environment with many extensions.
 
-Link to TCL/TK https://www.magicsplat.com/tcl-installer/  (see download link)
+Link to TCL/TK download: https://www.magicsplat.com/tcl-installer/  (see download link)
 If you have windows7 or greater; get the latest version of tcl - tcl-9.01 x64 or get x86 for 32 bit windows.
-This has also been tested on 8.6 versions of tcl/tk .
+This script/app has also been tested on 8.6 versions of tcl/tk .
 
 Make sure on that the installs of ghostscript and Imagemagick are in the Path in Environmental Settings after installing.
 Example:
