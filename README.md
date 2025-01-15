@@ -1,32 +1,59 @@
 # Prepress
 Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
 
-TCL/TK, Ghostscript, Imagemagick, Tablelist all have their own copywrites.
+TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
 
-Utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
-
-**Basic requirements**
-1. tcl/tk run time 
-   - running the script/app
+This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
+  - using opensource solutions
+  
+**Requirements**
+1. tcl/tk
+   - Run time for the prepress script
+     - source code https://www.tcl-lang.org/software/tcltk/download.html
+   - Windows: tclkit.exe runtime is included in download; 
+     - **Or download** https://www.magicsplat.com/tcl-installer/
+     - tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp
+     - http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
+   - MacOS: tclkit-reene-mac runtime included in download; Or download from MacPorts https://macports.org
+     - tclkit-reene-mac (ver 8.6.10 amd64) runs perfectly
+       - **Or download** from MacPorts ; 2025-01-15 currently at version 8.6.16
+         - https://ports.macports.org/port/tcl/
+           - sudo port install tcl
+         - https://ports.macports.org/port/tk/
+           - sudo port install tk +quartz
+         - https://ports.macports.org/port/tcllib/
+           - sudo port install tcllib
+         - https://ports.macports.org/port/tklib/
+           - sudo port install tklib
+   - Linux, unix, or bsd use standard app ports or compile from source
 2. Ghostscript
-   - used in rastering  pdf,ps,eps to grayscale tiff separations in c m y k and spot color.
+   - used in rastering pdf,ps,eps to grayscale tiff separations in c m y k and spot color.
    - used with imagemagick in coverting an image to a pdf retaining its dpi and color model
    - used in converting postscript to pdf
    - used in converting pdf to a postscript
    - used in converting pdf to a grayscale pdf
    - used in determining cmyk Ink Coverage of a pdf or ps file
-     - and then applying the coverage to a printer profile to calculate costs, or volume of ink
-     - **ghostscript all that is needed when using the Ink Coverage portion**
+     - the prepress script applies the resulting coverage to the default printer profile to calculate costs, or even volume of ink used
+     - **ghostscript is all that is needed when using the Ink Coverage portion using just the cmyk coverage part**
+       - imagemagick is needed to measure cmyk that includes spot
 3. Imagemagick
-   - used with ghostscript in coverting an image into a pdf retaining its dpi and color model
-4. java 8 or above - used for inspection of pdf's using pdfbox (http://www.apache.org/licenses/)
-5. potrace - in the creation of vectors from a bitmap
+   - used with ghostscript in coverting an image into a pdf and retaining its dpi and color model
+   - used in all image operations
+   - used identify for giving statistics on images, pdfs, ps files
+   - used in finding mediabox in ink coverage operation if it is present, otherwise using regex to find
+   - used in creating **pmb files** which potrace can use to create vector file
+   - used to create strokes in images , especially type that is thin and needs swelled.
+4. java version 8 or above
+   - used for inspection of pdf's using pdfbox (https://www.apache.org/licenses/)
+   - pdfbox is included in the lib directory of this app (https://pdfbox.apache.org/)
+5. potrace 
+   - used in the creation of vectors from a bitmap (pbm files)
 5. pdfbox - shows the cropbox, mediabox and trimbox data
 
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
 Therefore not all of the above requirements need to be present.
 
-A tcl/tk needs to be downloaded if not present. My favorite for windows tcl/tk is magicsplat.
+
 
 This application/script makes it easy to use opensource commands without escaping as when using a shell.
 By having a GUI and file dialogs it is much faster to use than using the command line.
@@ -40,6 +67,7 @@ Link to potrace https://potrace.sourceforge.net/#downloading
 
 It comes with the full environment with many extensions.
 
+A tcl/tk needs to be downloaded if not present. My favorite for windows tcl/tk is magicsplat.
 Link to TCL/TK download: https://www.magicsplat.com/tcl-installer/  (see download link)
 If you have windows7 or greater; get the latest version of tcl - tcl-9.01 x64 or get x86 for 32 bit windows.
 This script/app has also been tested on 8.6 versions of tcl/tk .
