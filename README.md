@@ -4,10 +4,17 @@ Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-pri
 Utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 
 **Basic requirements**
-1. tcl/tk run time - running the script/app
-2. Ghostscript - used in rastering separations from a pdf - 
+1. tcl/tk run time 
+   - running the script/app
+2. Ghostscript
    - used in rastering  pdf,ps,eps to grayscale tiff separations in c m y k and spot color.
+   - used in converting postscript to pdf
+   - used in converting pdf to postscript
+   - used in converting pdf to grayscale pdf
+   - used in determining cmyk Ink Coverage of pdf or ps files
+     - and applying the coverage to a printer profile to calculate costs, or volume of ink
 3. Imagemagick
+
 Optional
 4. java 8 or above - used for inspection of pdf's using pdfbox
 5. potrace - for creating vectors
@@ -21,7 +28,7 @@ Link to Imagemagick https://imagemagick.org/index.php
 
 Link to potrace https://potrace.sourceforge.net/#downloading
 
-## WINDOWS
+## WINDOWS INSTALL
 
 It comes with the full environment with many extensions.
 
