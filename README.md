@@ -8,27 +8,28 @@ This script/app is a utility to help fine tune, convert, measure coverage, or in
 This scirpt/app uses opensource solutions.\
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
 Therefore not all of the below requirements need to be present. 
-**To make the best use of our prepress workflow we recommend at least having ghostscript and imagemagick installed.**
+**To make the best use of our prepress workflow we recommend at having ghostscript and imagemagick installed.**
 
 This application/script makes it easy to use opensource commands without escaping as when one uses a shell such as mac terminal or bash.
 By having a GUI and file dialogs it is much faster to use than using the command line.
 
-The actions (or commands) that 'prepress' executes are the ones that we use in our print production workflows.
+The actions (or commands) that 'prepress' executes are the ones that we use in our print production workflows.\
 **Examples**
  - soft proofing: receiving a pdf; rasterizing it; creating a cmyk color model tiff file; wrapping the tiff into a pdf by using 'image to pdf' in menu.
    This is a 2 step process and in in future will add process to 1 menu item.
  - receive a pdf: rasterizing it; creating separate grayscale tiff files; swell the type or art work if too thin. 
    If necessary: copy and paste using gimp to achieve the right balance in type and logo's by leaving area's original alone.
  - grayscale a pdf file
+ - batch processing image files: downsizing while retain original color model; choose directory and all images are rescaled and put in a new directory.
  
 **Requirements**
 1. tcl/tk runtime
-   - Windows: tclkit.exe runtime is included in download
-     - **Or download** https://www.magicsplat.com/tcl-installer/
-     - tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp
-     - http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
-   - MacOS: tclkit-mac runtime included in downloadhttps://macports.org
-     - tclkit-mac (ver 8.6.10 amd64) runs perfectly
+   - **Windows: tclkit.exe runtime is included in download No further action required in step 1**
+     - note: tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp as magicsplat's install
+     - Or http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
+     - Or download for system wide tcl/tk** https://www.magicsplat.com/tcl-installer/
+   - **MacOS: Use tclkit-mac runtime included in download - No further action required in step 1**
+     - tclkit-mac (ver 8.6.10 amd64) runs perfectly 
        - **Or download** from MacPorts https://macports.org
          - If macports not install then choose from site the correct install
          - Then if command line tools not already install them
@@ -47,7 +48,8 @@ The actions (or commands) that 'prepress' executes are the ones that we use in o
            - sudo port install tcllib
          - https://ports.macports.org/port/tklib/
            - sudo port install tklib
-   - Linux, unix, or bsd use standard app ports or compile from source
+   - Linux, unix, or bsd use standard package managers to set up tcl/tk ports or compile from source below
+     - make sure that tcl, Tk, tklib, and tclLib are all installed
    - tcl/tk source code (if you are up to it) - **source can be compiled to most operating systems**
      - source code https://www.tcl-lang.org/software/tcltk/download.html
 2. Ghostscript
