@@ -23,8 +23,6 @@ The actions (or commands) that 'prepress' executes are the ones that we use in o
  
 **Requirements**
 1. tcl/tk runtime
-   - tcl/tk source code (if you are up to it)
-     - source code https://www.tcl-lang.org/software/tcltk/download.html
    - Windows: tclkit.exe runtime is included in download
      - **Or download** https://www.magicsplat.com/tcl-installer/
      - tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp
