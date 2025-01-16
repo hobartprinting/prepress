@@ -27,8 +27,9 @@ msgcat::mcflmset {
 	"m_openImagePdfEpsInfoAll" {Identify-Open Image/PDF/EPS -ALL)...}
 	"m_openImagePdfEpsInfoSummary" {Identify-Open Image/PDF/EPS summary...}
 	"m_openPdfPsPdfinfo" {pdfinfo-Open PDF show Media Sizes...}
+	"m_openPdfBoxJar" {PdfBox - Open PDF and Display Inspection...}
 	"m_Vector" {Vector}
-	"m_openBitmapPBMCreatePS" {Open .pbm file -> Create Vector file...}
+	"m_openBitmapPBMCreatePS" {Open .pbm file and Create Vector file...}
 	"m_openImageCreatePBM" {Open Image and Create .pbm file...}
 	"m_Inkcoverage" {InkCoverage}
 	"m_measureCMYK" {Measure coverage cmyk...}
