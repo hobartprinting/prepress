@@ -6,24 +6,29 @@ TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 This scirpt/app is using opensource solutions.
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
-Therefore not all of the below requirements need to be present.
+Therefore not all of the below requirements need to be present. 
+**To make the best use of our prepress workflow we recommend at least having ghostscript and imagemagick installed.**
 
-
-
-This application/script makes it easy to use opensource commands without escaping as when using a shell.
+This application/script makes it easy to use opensource commands without escaping as when one uses a shell such as mac terminal or bash.
 By having a GUI and file dialogs it is much faster to use than using the command line.
-The actions (or commands) that we use in print production are in the application already.
-  
+
+The actions (or commands) that 'prepress' executes are the ones that we use in our print production workflows.
+**Examples**
+ - soft proofing: receiving a pdf; rasterizing it; creating a cmyk color model tiff file; wrapping the tiff into a pdf.
+ - receive a pdf: rasterizing it; creating separate grayscale tiff files; swell the type or art work if too thin. 
+   If necessary: copy and paste using gimp to achieve the right balance in type and logo's by leaving area's original alone.
+ - grayscale a pdf file
+ 
 **Requirements**
 1. tcl/tk runtime
-   - Run time for the prepress script
+   - tcl/tk source code (if you are up to it)
      - source code https://www.tcl-lang.org/software/tcltk/download.html
    - Windows: tclkit.exe runtime is included in download
      - **Or download** https://www.magicsplat.com/tcl-installer/
      - tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp
      - http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
-   - MacOS: tclkit-reene-mac runtime included in downloadhttps://macports.org
-     - tclkit-reene-mac (ver 8.6.10 amd64) runs perfectly
+   - MacOS: tclkit-mac runtime included in downloadhttps://macports.org
+     - tclkit-mac (ver 8.6.10 amd64) runs perfectly
        - **Or download** from MacPorts https://macports.org
          - If macports not install then choose from site the correct install
          - Then if command line tools not already install them
@@ -43,6 +48,8 @@ The actions (or commands) that we use in print production are in the application
          - https://ports.macports.org/port/tklib/
            - sudo port install tklib
    - Linux, unix, or bsd use standard app ports or compile from source
+   - tcl/tk source code (if you are up to it) - **source can be compiled to most operating systems**
+     - source code https://www.tcl-lang.org/software/tcltk/download.html
 2. Ghostscript
    - used in rastering pdf,ps,eps to grayscale tiff separations in c m y k and spot color.
    - used with imagemagick in coverting an image to a pdf retaining its dpi and color model
