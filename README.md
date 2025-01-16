@@ -120,8 +120,13 @@ I you must set Path variables in Windows: \
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
 
 # MacOS Note:
-If you create your own tcl/tk environment with macports or compiling from source here are options. \
-Change or create another prepress.command file.
-
-
+If you create your own tcl/tk environment with macports or compiling from source here are ideas. \
+Change or create another prepress.command file. \
+  - file named prepress-sys.command \
+    #!/bin/sh \
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" \
+    tclsh $DIR/prepress-main.tcl \
+    exit 0  \
+  - cd to the directory where this new file exists in terminal and type below \
+    chmod +x ./prepress-sys.command \
 
