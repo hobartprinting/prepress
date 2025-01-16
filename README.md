@@ -10,13 +10,22 @@ This script/app is a utility to help fine tune, convert, measure coverage, or in
 1. tcl/tk
    - Run time for the prepress script
      - source code https://www.tcl-lang.org/software/tcltk/download.html
-   - Windows: tclkit.exe runtime is included in download; 
+   - Windows: tclkit.exe runtime is included in download
      - **Or download** https://www.magicsplat.com/tcl-installer/
      - tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp
      - http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
-   - MacOS: tclkit-reene-mac runtime included in download; Or download from MacPorts https://macports.org
+   - MacOS: tclkit-reene-mac runtime included in downloadhttps://macports.org
      - tclkit-reene-mac (ver 8.6.10 amd64) runs perfectly
-       - **Or download** from MacPorts ; 2025-01-15 currently at version 8.6.16
+       - **Or download** from MacPorts https://macports.org
+         - If macports not install then choose from site the correct install
+           - Then if command line tools not already install them
+             - test by open terminal and type gcc - if not install will get an alert box
+             - to install
+               - in terminal type
+                 - xcode-select --install
+                 - Click “Install” to download and install Xcode Command Line Tools.
+                 - xcodebuild -license  (then agree to the license)
+         - In terminal use sudo and be ready to type in your admin password
          - https://ports.macports.org/port/tcl/
            - sudo port install tcl
          - https://ports.macports.org/port/tk/
@@ -35,14 +44,33 @@ This script/app is a utility to help fine tune, convert, measure coverage, or in
    - used in determining cmyk Ink Coverage of a pdf or ps file
      - the prepress script applies the resulting coverage to the default printer profile to calculate costs, or even volume of ink used
      - **ghostscript is all that is needed when using the Ink Coverage portion using just the cmyk coverage part**
-       - imagemagick is needed to measure cmyk that includes spot
+       - imagemagick is needed to measure cmyk that can measure spot
+   - **Install**
+   	 - Windows
+   	   - https://www.ghostscript.com/releases/gsdnld.html
+   	     - after install restart windows
+   	     - to test open cmd.exe and type where.exe gswin64c 
+   	       - it will show the install path
+   	 - MacOS 
+   	   - https://ports.macports.org/port/ghostscript/
+   	     - sudo port install ghostscript
+   	     - Or **upgrade** existing version
+   	       - sudo port selfupdate && sudo port upgrade ghostscript
+   	       - to test open terminal and type which gs
+   	         - it will show the install path
 3. Imagemagick
    - used with ghostscript in coverting an image into a pdf and retaining its dpi and color model
    - used in all image operations
    - used identify for giving statistics on images, pdfs, ps files
    - used in finding mediabox in ink coverage operation if it is present, otherwise using regex to find
-   - used in creating **pmb files** which potrace can use to create vector file
+   - used in creating **pbm files** which potrace can use to create vector file
    - used to create strokes in images , especially type that is thin and needs swelled.
+     - **Install**
+       - Windows
+         - https://imagemagick.org/script/download.php
+       - MacOS - MacPorts.org
+         - https://ports.macports.org/port/ImageMagick7/
+           - sudo port install ImageMagick7 
 4. java version 8 or above
    - used for inspection of pdf's using pdfbox (https://www.apache.org/licenses/)
    - pdfbox is included in the lib directory of this app (https://pdfbox.apache.org/)
@@ -59,7 +87,7 @@ This application/script makes it easy to use opensource commands without escapin
 By having a GUI and file dialogs it is much faster to use than using the command line.
 The actions (or commands) that we use in print production are in the application already.
 
-Link to Imagemagick https://imagemagick.org/index.php
+
 
 Link to potrace https://potrace.sourceforge.net/#downloading
 
