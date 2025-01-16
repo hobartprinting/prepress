@@ -103,16 +103,25 @@ Download the released zip and unzip, place prepress folder in directory (I use D
 5. potrace 
    - used in the creation of vectors from a bitmap (.pbm files) \
      potrace: https://potrace.sourceforge.net/#downloading
-5. pdfbox - shows the cropbox, mediabox and trimbox data
+5. pdfbox
+   - shows the cropbox, mediabox and trimbox data
+   - Downloads
+     https://www.xpdfreader.com/about.html  - note - this has window version \
+     https://ports.macports.org/port/xpdf/ - macports version \
+     https://poppler.freedesktop.org/ \
+     https://poppler.freedesktop.org/api/glib/ \
+     https://www.cyberciti.biz/faq/linux-unix-view-technical-details-of-pdf/
 
-
-* Windows Note:
+# Windows Note:
 Make sure on that the installs of ghostscript and Imagemagick are in the Path in Environmental Settings after installing.
 Example:
 Path variables -  C:\Program Files\gs\gs9.23\bin;C:\Program Files\gs\gs9.23\lib \
 I you must set Path variables in Windows: \
 Control Panel → System and Security → System → Advanced System Settings → computer name, domain and workgroup settings → Advanced → Environment Variables
 
+# MacOS Note:
+If you create your own tcl/tk environment with macports or compiling from source here are options. \
+Change or create another prepress.command file.
 
 
 
