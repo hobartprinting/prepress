@@ -4,7 +4,8 @@ Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-pri
 TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
 
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
-This scirpt/app is using opensource solutions.
+
+This scirpt/app uses opensource solutions.\
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
 Therefore not all of the below requirements need to be present. 
 **To make the best use of our prepress workflow we recommend at least having ghostscript and imagemagick installed.**
@@ -14,7 +15,8 @@ By having a GUI and file dialogs it is much faster to use than using the command
 
 The actions (or commands) that 'prepress' executes are the ones that we use in our print production workflows.
 **Examples**
- - soft proofing: receiving a pdf; rasterizing it; creating a cmyk color model tiff file; wrapping the tiff into a pdf.
+ - soft proofing: receiving a pdf; rasterizing it; creating a cmyk color model tiff file; wrapping the tiff into a pdf by using 'image to pdf' in menu.
+   This is a 2 step process and in in future will add process to 1 menu item.
  - receive a pdf: rasterizing it; creating separate grayscale tiff files; swell the type or art work if too thin. 
    If necessary: copy and paste using gimp to achieve the right balance in type and logo's by leaving area's original alone.
  - grayscale a pdf file
