@@ -1874,4 +1874,4 @@ proc showNewProfileDialog {} {
 }
 
 # if the printer profiles have been saved this will open the file and replace the initial demo printers
-openPrinters ; # this will replace the initial demo printes and create a whole new dict_printers
+openPrinters ; # this will replace the initial demo printers and create a whole new dict_printers

@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh 
 ###!/usr/bin/env wish
 # Copyright 2008 Randall J Hobart
-#   
+# Prepress-1.0.0  
 #   Java Version -began: 2008
 #   Objective-C Version: 2008
 #	Tcl.Tk Version began: 12-27-2019
@@ -22,6 +22,7 @@
 #		Using exec from tcl you don't need the path escaped as in a shell
 #   Links on using ghostscript
 #       http://linux-commands-examples.com/ghostscript
+#		https://ghostscript.readthedocs.io/en/gs10.02.1/Devices.html   - added 12-11-2024
 #		https://ghostscript.readthedocs.io/en/latest/Devices.html
 #       https://ghostscript.com/docs/9.54.0/Devices.htm
 #		https://ghostscript.com/docs/9.54.0/Use.htm
@@ -38,7 +39,14 @@
 #       https://www.imagemagick.org/Usage/transform/#edge
 #       https://www.imagemagick.org/Usage/morphology/#edge
 #		https://www.imagemagick.org/Usage/transform/
+#	Links on poppler operations - which include pdfinfo used for information of pdf such as artbox and bleedbox
+#		https://www.prepressure.com/pdf/basics/page-boxes
+#		https://www.cyberciti.biz/faq/linux-unix-view-technical-details-of-pdf/    - this as instructions on how to use
+#		http://www.xpdfreader.com/download.html  - note - this has window version
+#		https://poppler.freedesktop.org/
+#		https://poppler.freedesktop.org/api/glib/
 #	tcl/tk links
+#		https://www.tutorialspoint.com/tcl-tk/tcl_tk_quick_guide.htm
 #		https://wiki.tcl-lang.org/page/exec
 #       https://wiki.tcl-lang.org/page/Actions
 #		https://www.tcl.tk/man/tcl8.5/tutorial/Tcl26.htm  - Running other programs from TCL using exec and open
@@ -77,6 +85,30 @@
 #				     v 6.9.11 2021 - macports - successful - all compatible
 #   Montery          v 6.9.11-60 Q16 arm 2021 - successful - all
 #	Ventura-morpheus v 6.9.10-78 Q16 x86_64 2019-12-17 - formatting bounding-box fails
+# Changes
+# 
+# Send to printers - started 12-12-2024
+# Purpose:
+# 		  Send a file to a printer or print server
+#		  Get a list of active printers on system
+#		  Put printers into a list in which user can choose the default printer to send the file
+#		  Allow user to choose the file using gui dialog box
+#         This will allow file to be sent straight to printer without being reinterpreted by an application
+#		  	Normally files are opened by an application then printed through that application.
+#			In which the file could and most likely be reinterpreted
+#				Which would mean the original file may have been changed - perhaps the colormodel,  or even the pixel value
+# 	Use Cups for mac or linux and use Windows cmds for windows
+# 	https://stuff.mit.edu/afs/athena/astaff/project/opssrc/cups/cups-1.4.4/doc/help/options.html
+#	https://www.cups.org/doc/options.html
+#	If cups installed then below has webpage for instructions locally
+# 	http://localhost:631/help/options.html?TOPIC=Getting+Started&QUERY
+# Example:
+# 	lpstat -p -d
+# 	printer Brother_HL_L2360D_series is idle.  enabled since Thu Dec 12 15:14:51 2024
+# 	printer EnPress is idle.  enabled since Wed Sep  4 15:21:16 2024
+# 	printer IQueImpress is idle.  enabled since Mon Mar 18 19:17:42 2024
+# 	printer IQueue_Server is idle.  enabled since Fri Dec 13 16:17:39 2024
+# 	system default destination: IQueue_Server
 
 package require Tk
 package require msgcat
@@ -128,7 +160,7 @@ set printer_default "none" ; # selected default printer
 set dict_printers {} ; # a nested dictionary of printers - value -> dict
 ### END vars pertaining to inkcoverage
 
-
+## GUI ##
 proc creategui {} {
 	#wm title . "PrePressActions"
 	wm title . [msgcat::mc title] ; # PrePressActions
@@ -217,6 +249,8 @@ proc creategui {} {
 		-command "openImagePdfEpsInfoSummary"
 	.mbar.identify add command -label [msgcat::mc "m_openPdfPsPdfinfo"] \
 		-command "openPdfPsPdfinfo"
+	.mbar.identify add command -label [msgcat::mc "m_openPdfBoxJar"] \
+		-command "openPdfBoxJar"
 	
 	# menus for special potrace - 
 	#if {(($::tcl_platform(user) eq "morpheus") && ($::tcl_platform(os) eq "Darwin"))} {
@@ -471,7 +505,7 @@ proc checkEnvSettings {} {
 	
 	# windows fails with the "which" command line app - "where" works for windows
 	# windows may need to be manually setup for command line apps
-	# careful - platform can be windows or unix
+	# WINDOWS ENVIR
 	if { $::tcl_platform(platform) eq "windows" } {
 		set platform "Windows"
 		.txt insert end "starting checkEnvSettings " procColor
@@ -482,16 +516,16 @@ proc checkEnvSettings {} {
 		set cmd_gs "where gswin64c"
 		set cmd_gs_error "false"
 		if {[catch {exec {*}$cmd_gs > $gs_location} result]} {
-			.txt insert end "Error at finding $cmd_gs: $result\n"
+			.txt insert end "Error --- at finding $cmd_gs: $result\n"
 			set cmd_gs_error "true"
 		} else {
 			if {[file exists $gs_location]} {
 				set channel [open $gs_location r]
 				set where_gs [read $channel]
 				close $channel
-				puts $where_gs
+				#puts $where_gs
 				if {[string match *gswin64c* "$where_gs"] } {
-					.txt insert end "Ghostscript present. Path: $where_gs" ; # has \n from file read
+					.txt insert end "Ghostscript- present. Path: $where_gs" ; # has \n from file read
 					set gs "gswin64c"
 				} else {
 					# means that they could have the 32 bit gs installed or nothing installed
@@ -524,7 +558,7 @@ proc checkEnvSettings {} {
 		} ; # end of finding if we have gswin32c
 		# Ghostscript not available
 		# Are disabling all items from menu that are related to gs and utilities such as ps2pdf, pdf2ps
-		if {$cmd_gs_error == "true"} {
+		if {$cmd_gs_error eq "true"} {
 			.txt insert end "Ghostscript not installed or not found\n"
 			ghostscriptDisable "$platform"
 		} else {
@@ -534,17 +568,24 @@ proc checkEnvSettings {} {
 			if {[catch {exec $cmd {*}$cmd_options} result]} {
 				.txt insert end "\tError: $result\n"
 			} else {
-				.txt insert end "\tGhostscript version: $result\n"
+				set lines [split $result "\n"]
+				if {[llength $lines] > 0} {
+					.txt insert end "\tGhostscript version: [lindex $lines 0]\n"	
+				}
+				if {[llength $lines] > 0} {
+					.txt insert end "\tGhostscript version: [lindex $lines 1]\n"
+				}
 			}
 		}
 		
 		################### need to find the pdf2ps - these just show presence of ps2pdf WINDOWS ##########################
+		if {0} {
 		set cmd_pdf2ps "where pdf2ps"
 		set cmd_pdf2ps_error "false"
 		set location_pdf2ps $globalparms(cache_path)[file separator]$globalparms(pdf2ps_location_file)
 		set location_pdf2ps [file nativename $location_pdf2ps]
 		if {[catch {exec {*}$cmd_pdf2ps > $location_pdf2ps} result]} {
-			.txt insert end "\tError at finding $cmd_gs: $result\n"
+			.txt insert end "\tError at finding $cmd_pdf2ps: $result\n"
 			set cmd_pdf2ps_error "true"
 		} else {
 			if {[file exists $location_pdf2ps]} {
@@ -565,8 +606,10 @@ proc checkEnvSettings {} {
 				set cmd_pdf2ps_error "true"
 			}
 		}
+		} ; #dead code - not using pdf2ps
 		
 		################ find ps2pdf - these just show presence of ps2pdf WINDOWS ########################################
+		if {0} {
 		set cmd_ps2pdf "where ps2pdf"
 		set cmd_ps2pdf_error "false"
 		set location_ps2pdf $globalparms(cache_path)[file separator]$globalparms(ps2pdf_location_file)
@@ -589,6 +632,7 @@ proc checkEnvSettings {} {
 				}
 			}
 		}
+		} ; # dead code not using ps2pdf
 		
 		##### need to get imagemagick to work on windows, try magick instead of convert WINDOWS #################################
 		##### windows already has a convert command for the filesystem 
@@ -612,7 +656,7 @@ proc checkEnvSettings {} {
 		
 		if {[catch {exec $cmd_version_6 {*}$cmd_options > $tempFile} result]} {
 			set b_magick_6 "false"
-			.txt insert end "ImageMagick 6: $result\n"
+			#.txt insert end "ImageMagick 6: $result\n"
 		} else {
 			#.txt insert end "$result" ; #when successful there is no value in result
 			.txt insert end "ImageMagick present: \n"
@@ -740,6 +784,35 @@ proc checkEnvSettings {} {
 			popplerDisable $platform
 		}
 		
+		## java
+		if {[catch {exec {*}"where java"} result]} {
+			.txt insert end "java not present. $result\n"
+			.txt insert end "\t Cannot run PdfBox\n"
+			pdfBoxJarDisable $platform
+		} else {
+			.txt insert end "java present. Path: $result\n"
+			if {[catch {exec {*}"java --version"} result]} {
+				.txt insert end "java version not found : $result\n"
+			} else {
+				.txt insert end "java Version: "
+				set i 0
+				foreach item $result {
+					if {$i eq 1} {
+						set num [split $item "."]
+						#puts [lindex $num 0]
+						if { [lindex $num 0] > 7 } {		
+							#.txt insert end "[lindex $num 0]\n"
+							.txt insert end "$item\n"
+						} else {
+							.txt insert end "$item - Need version 8 or greater to run pdfbox.pdf"
+							pdfBoxJarDisable $platform
+						}
+					}
+					incr i
+				}
+			}
+		}
+		
 		#puts "MAGIC_HOME - \%MAGIC_HOME\%"
 		#set cmd_magick_error false
 		#set location_convert $
@@ -791,17 +864,31 @@ proc checkEnvSettings {} {
 				}
 			}
 		} ; # end of catch statement - finding gs location
+		
 		if {$cmd_gs_error eq "true"} {
 			ghostscriptDisable "macOS-linux"
+		} else {
+			if {[catch {exec {*}"gs -v"} result]} {
+				.txt insert end "Ghostscript version: Failed\n"
+			} else {
+				set lines [split $result "\n"]
+				if {[llength $lines] > 0} {
+					.txt insert end "\tGhostscript version: [lindex $lines 0]\n"
+				}	
+				if {[llength $lines] > 0} {
+					.txt insert end "\tGhostscript version: [lindex $lines 1]\n"
+				}	
+			}
 		}
 					
 		# find pdf2ps
+		if {0} {
 		set cmd_pdf2ps "which pdf2ps"
 		set pdf2ps_location $globalparms(cache_path)[file separator]$globalparms(pdf2ps_location_file)
 		if {[catch {exec {*}$cmd_pdf2ps > $pdf2ps_location} result]} {
 			.txt insert end "\tpdf2ps not found: Error: $result\n"
 		} else {
-			# puts "test var result on pdf2ps: $result" ; # test result : nothing in result when op successful
+			
 			if {[file exists $pdf2ps_location]} {
 				set channel [open $pdf2ps_location]
 				set which_pdf2ps [read $channel]
@@ -813,9 +900,11 @@ proc checkEnvSettings {} {
 					
 				}
 			}
-		} ; # end of catch - finding pdf2ps
+		} 
+		} ; # no longer needing pdf2ps
 		
 		# find ps2pdf
+		if {0} {
 		set cmd_ps2pdf "which ps2pdf"
 		set ps2pdf_location $globalparms(cache_path)[file separator]$globalparms(ps2pdf_location_file)
 		if {[catch {exec {*}$cmd_ps2pdf > $ps2pdf_location} result]} {
@@ -831,7 +920,8 @@ proc checkEnvSettings {} {
 					.txt insert end "\t'ps2pdf' cannot be found.\n"
 				}
 			}
-		} ; # end of catch - finding ps2pdf
+		} 
+		} ; # dead code not using ps2pdf
 		
 		########################## magick  - MAC UNIX LINUX ########################
 		# find ImageMagick - version 6 uses "convert" command. version 7 uses "magick" command
@@ -880,7 +970,7 @@ proc checkEnvSettings {} {
 		
 		## ImageMagick is installed ; find out where UNIX
 		if {$b_magick eq "true"} {
-			set cmd_convert "which $convert"
+			set cmd_convert "which $convert" ; # $convert if ver 6 is convert if ver 7 is magick
 			
 			set convert_location $globalparms(cache_path)[file separator]$globalparms(convert_location_file)
 			if {[catch {exec {*}$cmd_convert > $convert_location} result]} {	
@@ -917,7 +1007,8 @@ proc checkEnvSettings {} {
 				if {[string length $which_composite] > 1 } {
 					.txt insert end "\t'composite' present. Path: $which_composite" 
 				} else {
-					.txt insert end "\t'composite' cannot be found.\n"
+					# in verison 7 it is magick composite -gravity center smile.gif rose: rose-over.png
+					# .txt insert end "\t'composite' cannot be found.\n"
 				}
 			}
 		} ; # end of catch - finding comosite location
@@ -979,7 +1070,7 @@ proc checkEnvSettings {} {
 				set channel [open $pdfinfo_location r]
 				set where_pdfinfo [read $channel]
 				close $channel
-				.txt insert end "pdfinfo present. Path $where_pdfinfo" ; # has \n from file read
+				.txt insert end "pdfinfo present. Path: $where_pdfinfo" ; # has \n from file read
 			} else {
 				set pdfinfo_found "false"
 			}
@@ -989,6 +1080,36 @@ proc checkEnvSettings {} {
 			.txt insert end "\tpdfinfo: failed to get path or location. Not installed.\n"
 			.txt insert end "\tpdfinfo: utilities from poppler; http://poppler.freedesktop.org\n"
 		}
+		
+		## java
+		if {[catch {exec {*}"which java"} result]} {
+			.txt insert end "java not present. $result\n"
+			.txt insert end "\t Cannot run PdfBox\n"
+			pdfBoxJarDisable $platform
+		} else {
+			.txt insert end "java present. Path: $result\n"
+			if {[catch {exec {*}"java --version"} result]} {
+				.txt insert end "java version not found : $result\n"
+			} else {
+				.txt insert end "java Version: "
+				set i 0
+				foreach item $result {
+					if {$i eq 1} {
+						set num [split $item "."]
+						#puts [lindex $num 0]
+						if { [lindex $num 0] > 7 } {		
+							#.txt insert end "[lindex $num 0]\n"
+							.txt insert end "\t$item\n"
+						} else {
+							.txt insert end "$item - Need version 8 or greater to run pdfbox.pdf"
+							pdfBoxJarDisable $platform
+						}
+					}
+					incr i
+				}
+			}
+		}
+		
 	} ; # end fo else - must be unix - or mac
 	
 	# if there is an int file then load it from disk
@@ -1009,9 +1130,10 @@ proc checkEnvSettings {} {
 #			Ghostscript, Imagemagick, potrace and utilities
 #			proc ghostscriptDisable, imageMagickDisable, potraceDisable
 # Purpose2: to enable or disable menu items such as to wrap or unwrap text - toggle the states
+## DISABLE MENUS
 proc ghostscriptDisable {varOS} {
 	.mbar.convert entryconfigure [msgcat::mc "m_openPDFtoTiff"] -state disable
-	.mbar.convert entryconfigure [msgcat::mc "m_openImageCreatePDF"] -state disable
+	.mbar.convert entryconfigure [msgcat::mc "m_openImageCreatePDF"] -state disable ; # this proc needs both gs and magick
 	.mbar.convert entryconfigure [msgcat::mc "m_openPSCreatePDF"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openPDFCreatePS"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openPDFCreateGrayscalePDF"] -state disable
@@ -1027,18 +1149,24 @@ proc imageMagickDisable {varOS} {
 	.mbar.convert entryconfigure [msgcat::mc "m_openImageFlipHorizontal"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openImageFlipVertical"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openDirBatchScaleImgs"] -state disable
+	.mbar.convert entryconfigure [msgcat::mc "m_openImageCreatePDF"] -state disable ; # this proc needs both gs and magick
 	.mbar.identify entryconfigure [msgcat::mc "m_openImagePdfEpsInfoAll"] -state disable
 	.mbar.identify entryconfigure [msgcat::mc "m_openImagePdfEpsInfoSummary"] -state disable
 	.mbar.vector entryconfigure [msgcat::mc "m_openImageCreatePBM"] -state disable
+	.mbar.vector entryconfigure [msgcat::mc "m_openBitmapPBMCreatePS"] -state disable ; # this proc needs both potrace and magick
 	puts "OS: $varOS : ImageMagick not present"
 }
 proc potraceDisable {varOS} {
-	.mbar.vector entryconfigure [msgcat::mc "m_openBitmapPBMCreatePS"] -state disable
+	.mbar.vector entryconfigure [msgcat::mc "m_openBitmapPBMCreatePS"] -state disable ; # this proc needs both potrace and magick
 	puts "OS: $varOS : potrace not present"
 }
 proc popplerDisable {varOS} {
 	.mbar.identify entryconfigure [msgcat::mc "m_openPdfPsPdfinfo"] -state disable
 	puts "OS: $varOS : pdfinfo not present"
+}
+proc pdfBoxJarDisable {varOS} {
+	.mbar.identify entryconfigure [msgcat::mc "m_openPdfBoxJar"] -state disable
+	puts "OS: $varOS : pdfbox.jar or java 8 or above not present"
 }
 proc wrapLinesDisable {} {
 	.mbar.files entryconfigure [msgcat::mc "m_WrapLines"] -state disable
@@ -1076,7 +1204,7 @@ proc quit {} {
 # Ghostscript command
 # Fixed for windows 2-26-23, 8-2-23 and tested
 proc openPDFtoTiff {} {
-	#open a dialog box for the dpi
+	#open a message box for the dpi
 	global LINE
 	global gs
 	global dpi
@@ -1257,7 +1385,8 @@ proc openPDFtoTiff {} {
 # menu command
 # imagemagick command convert
 # added png, jpeg, jpg on 4/21/22
-# changed/tested for windows - using LIST in the command options - 2/27/23
+# changed/tested for windows - using tcl List in the command options - 2/27/23
+# mark openImageMono {}
 proc openImagetoMono {} {
 	global LINE
 	global globalparms
@@ -1613,6 +1742,7 @@ proc openDirBatchScaleImgs {} {
 		.txt insert end "$LINE" lineColor
 		return
 	}
+	
 	set dirname [tk_chooseDirectory]
 	if {$dirname eq ""} {
 		.txt insert end "Canceled\n"
@@ -1748,7 +1878,9 @@ proc openImageCreatePDF {} {
 	#.txt insert end "New File: [file rootname [file tail $escaped_outputFile]][file extension [file tail $escaped_outputFile]]\n"
 	update idletasks
 	set cmd "$convert"
+	
 	set cmd_options [list $filename -flatten -quality 100 $outputFile] ; # flatten added 11-1-23
+	
 	if {[catch {exec $cmd {*}$cmd_options} result]} {
 		.txt insert end "Error: $result\n"	
 	} else {
@@ -2158,7 +2290,9 @@ proc openImagePdfEpsInfoSummary {} {
 
 # part of poppler operations - 8/28/23
 # https://www.prepressure.com/pdf/basics/page-boxes
-# http://www.xpdfreader.com/download.html
+# https://www.cyberciti.biz/faq/linux-unix-view-technical-details-of-pdf/
+#
+# http://www.xpdfreader.com/download.html  - note - this has window version
 # 
 proc openPdfPsPdfinfo {} {
 	global pdfinfo
@@ -2186,7 +2320,54 @@ proc openPdfPsPdfinfo {} {
 	} else {
 		.txt insert end "$result\n"
 	}
+	
 	.txt insert end "$LINE" lineColor
+}
+
+# opens pdf file using pdfbox.jar
+# https://pdfbox.apache.org/
+# java 8 or higher must be present
+# PDFBOX
+proc openPdfBoxJar {} {
+	global LINE
+	global script_path
+	# the menu item would be disabled if java 8 was not present
+	set types {
+		{PDF .pdf}
+	}
+	
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPdfBoxJar\n" procColor
+	.txt insert end "This will open a PDF file for inspection using pdfbox.jar using java\n"
+	.txt insert end "https://www.apache.org/licenses/LICENSE-2.0\n" ; # dirHyperlink
+	.txt insert end "https://pdfbox.apache.org/\n" ; # dirHyperlink
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	
+	if {$filename eq ""} {
+		.txt insert end "canceled\n"
+		.txt insert end "$LINE" lineColor
+		return 
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	
+	set cmd "java"
+	set cmd_options [list -jar "$script_path/lib/pdfbox.jar" debug $filename]
+	# use of & operator to separate from the gui so it can continue
+	if {[catch {exec $cmd {*}$cmd_options &} result]} {
+		.txt insert end "Error: $result\n"
+	} else {
+		#.txt insert end "$result\n"
+		
+		.txt insert end "Opened file: [file tail $filename]\n"
+		.txt insert end "Directory: "
+		.txt insert end "[file dir $filename]" dirHyperlink
+		
+		.txt insert end "\n"
+	}
+	
+	.txt insert end "$LINE" lineColor
+	
 }
 
 # part of protrace operations
@@ -2344,8 +2525,8 @@ proc openBitmapPBMCreatePS {} {
 		}
 	}
 	
-	#create more rounded edges
-	set cmd_options [list --alphamax 1.234 --turdsize 2 --longcurve --turnpolicy black -o $filename-round.ps $filename]
+	#create more rounded edges - changed alphamax from 1.234 to 1.334 and take out --longcurve , add -O .4 (opttolerance)
+	set cmd_options [list --alphamax 4.334 --turdsize 2 --turnpolicy black --opttolerance 42.0 -o $filename-round.ps $filename]
 	if { $success eq "true" } {
 		if {[catch {exec $potrace {*}$cmd_options} result]} {
 			.txt insert end "Error $result\n"
@@ -2500,6 +2681,7 @@ proc measureCMYK {} {
 	global gs
 	global LINE
 	global identify ; # an IM command
+	global convert ; # if version 7 should be magick as the command and not convert as in version 6
 	global b_magick
 	global b_magick_6
 	global b_magick_7
@@ -2522,9 +2704,15 @@ proc measureCMYK {} {
 	# .txt insert end "\uD83D\uDE00 "
 	# https://core.tcl-lang.org/tips/doc/trunk/tip/600.md
 	#    use the emoji directly by keyboard or menu options
-	.txt insert end "🥸 🔬" verybig
-	.txt insert end \n
+	if { $::tcl_platform(platform) eq "windows" } {
 	
+	} else {
+		.txt insert end "🔬" verybig
+		.txt insert end \n
+	}
+	
+	# if a printer is set as default it will be the number id of the printer and never the name of the printer
+	# even if the printer is named none ;  'none' is applied by the script and not the user
 	if {$globalparms(defaultprinter) eq "none"} {
 		set msg "Could not find default printer\nPlease go to InkCoverage->Add Printer Profiles and select the printer. \
 				Do you wish to continue without calculating the cost to print?"
@@ -2853,7 +3041,7 @@ proc measureCMYK {} {
 			.txt insert end "Print Size set to: $printsize_dlg\n"
 		}
 	}
-	############################## Do Calculations Summary #############################################
+	############################## Do Calculations Summary ############################################# marked
 	if {$width > 0 || $height > 0} {
 		set sq_in_page [expr $width * $height]
 		set total_sq_in [expr $sq_in_page * $pages_total]
@@ -2871,11 +3059,13 @@ proc measureCMYK {} {
 		
 		# apply printer default profile and calculate cost to print - need to catch getting the printer - may not exist
 		if [ catch {set printer [dict get $dict_printers $globalparms(defaultprinter)]} result] {
-			#if here then the key is not found - which is an integer and user will not understand it
-			#therefore do not use the result as the message - use custom msg
-			set msg "Default Printer cannot be found!"
+			# there are no printers named 'none' so this will 'trip the catch' statement and if here an error occured
+			# no need for messageBox since the was asked in the beginning and user proceeded anyway
+			set msg "Default Printer cannot be found!\n Select Printer from Printer Profiles."
 			set reply [tk_messageBox -parent . -message $msg -icon warning -type ok]
+			
 			.txt insert end "Could not find default printer... Exit calculations\n"
+			
 			#clean up
 			if {[file isdirectory $fullpathdir_cmyk]} {
 					file delete -force $fullpathdir_cmyk
@@ -3104,7 +3294,7 @@ proc measureCMYK {} {
 				set total_cost_black 0.0
 			}
 			
-			######## Here we need to implement a spot color - From the menu item will have spot set to true
+			######## Here we need to implement a spot color - From the menu item will have spot set to true ## marked
 			
 			#### end spot
 			
@@ -3223,6 +3413,10 @@ proc measureCMYKspot {} {
 		{PS .ps}
 		{PDF .pdf}
 	}
+	
+	set msg "This action has not been implemented yet"
+	set result [tk_messageBox -parent . -message $msg -type ok]
+	return
 }
 # menu command
 # added 06-23-18
@@ -3252,6 +3446,7 @@ proc escapePath {varPath} {
 
 # Toolbox Open Folder - any platform
 # Paul Obermeier - https://groups.google.com/forum/#!topic/comp.lang.tcl/tMu5e4fFg80
+# Changed to support opening from directory
 proc StartFileBrowser { dir } {
 	if { $::tcl_platform(platform) eq "windows" } {
 		set browserProg "explorer"
@@ -3272,7 +3467,7 @@ proc StartFileBrowser { dir } {
 		eval exec $browserProg [list [file nativename $dir]] & 
 		#puts "$browserProg [list [file nativename $dir]] &"
 		set lstDir [list [file nativename $dir]]
-		puts $lstDir
+		#puts $lstDir
 	}
 }
 #### DpiDialog for PDF to tiff conversion ###############################
@@ -3331,6 +3526,7 @@ proc showDpiDialog {} {
 		.dpiDialog.f.buttons.cancel invoke
 	}
 	wm transient .dpiDialog .
+	::tk::PlaceWindow .dpiDialog widget .
 	# display dialog
 	wm deiconify .dpiDialog
 	
@@ -3437,6 +3633,7 @@ proc showBatchDialog {} {
 		.batchDialog.fbut.cancel invoke
 	}
 	wm transient .batchDialog .
+	::tk::PlaceWindow .batchDialog widget .
 	# display
 	wm deiconify .batchDialog
 	
@@ -3489,6 +3686,7 @@ proc showSwellDialog {} {
 	
 	toplevel .swellDialog
 	wm withdraw .swellDialog
+	update idletasks
 	
 	#set vars for dialog
 	set swell $globalparms(set_swell)
@@ -3528,6 +3726,10 @@ proc showSwellDialog {} {
 		.swellDialog.fbtn.cancel invoke
 	}
 	wm transient .swellDialog .
+	#::tk::PlaceWindow .swellDialog . # this places it in center of screen
+	::tk::PlaceWindow .swellDialog widget .
+	#::tk::PlaceWindow .swellDialog widget .
+	#wm transient .swellDialog [winfo toplevel [winfo parent .swellDialog]]
 	wm deiconify .swellDialog
 	
 	#make it modal - works as above but not modal
@@ -3536,6 +3738,7 @@ proc showSwellDialog {} {
 	focus .swellDialog.f.lf.swell
 	catch {grab set .swellDialog}
 	catch {tkwait window .swellDialog}
+	
 }
 
 ######### END SWELL DIALOG ##########
@@ -3614,6 +3817,7 @@ proc showNumCopiesDlg {status} {
 		.numcopiesDlg.fbtn.cancel invoke
 	}
 	wm transient .numcopiesDlg .
+	::tk::PlaceWindow .numcopiesDlg widget .
 	wm deiconify .numcopiesDlg
 	
 	#make it modal
@@ -3624,7 +3828,7 @@ proc showNumCopiesDlg {status} {
 	
 }
 ######## END NUMBER COPIES DIALOG ######
-######### PAGE SIZE DIALOG #######
+######### PAGE SIZE DIALOG ####### marked
 ###to manually put in page size if MediaBox not found ###
 proc pagesizeDlgCancel {} {
 	global printsize_dlg
@@ -3714,6 +3918,7 @@ proc showPagesizeDlg {} {
 		.pagesizeDlg.fbtn.cancel invoke
 	}
 	wm transient .pagesizeDlg .
+	::tk::PlaceWindow .pagesizeDlg widget .
 	wm deiconify .pagesizeDlg
 	
 	#make it modal - works as above but not modal
@@ -3733,8 +3938,10 @@ proc printerProfilesWin {} {
 }
 
 set script_path [ file dirname [ file normalize [ info script ] ] ]
-puts "script_path: $script_path\n"
-lappend auto_path "$script_path/lib/tablelist"
+puts "script_path: $script_path"
+lappend auto_path "$script_path/lib/"
+#lappend auto_path "$script_path/lib/tablelist"
+
 #lappend auto_path "$script_path/lib/sqlite3"
 
 initParams
@@ -3743,5 +3950,5 @@ msgcat::mclocale $globalparms(locale)
 msgcat::mcload [file join [file dirname [info script]] msgs]
 creategui
 
-
+#puts $auto_path
 

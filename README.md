@@ -18,13 +18,13 @@ This script/app is a utility to help fine tune, convert, measure coverage, or in
      - tclkit-reene-mac (ver 8.6.10 amd64) runs perfectly
        - **Or download** from MacPorts https://macports.org
          - If macports not install then choose from site the correct install
-           - Then if command line tools not already install them
-             - test by open terminal and type gcc - if not install will get an alert box
-             - to install
-               - in terminal type
-                 - xcode-select --install
-                 - Click “Install” to download and install Xcode Command Line Tools.
-                 - xcodebuild -license  (then agree to the license)
+         - Then if command line tools not already install them
+         - test by open terminal and type gcc - if not install will get an alert box
+          - to install
+            - in terminal type
+            - xcode-select --install
+            - Click “Install” to download and install Xcode Command Line Tools.
+            - xcodebuild -license  (then agree to the license)
          - In terminal use sudo and be ready to type in your admin password
          - https://ports.macports.org/port/tcl/
            - sudo port install tcl
