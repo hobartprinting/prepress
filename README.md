@@ -6,7 +6,7 @@ TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 This scirpt/app is using opensource solutions.
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
-Therefore not all of the above requirements need to be present.
+Therefore not all of the below requirements need to be present.
 
 
 
