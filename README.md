@@ -1,4 +1,4 @@
-# Prepress
+# Introduction
 Note: The BSD-3 clause applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
 
 TCL/TK, Ghostscript, Imagemagick, Java, and PdfBox have their own copyrights.
@@ -22,7 +22,7 @@ The actions (or commands) that 'prepress' executes are the ones that we most use
  - grayscale a pdf file
  - batch processing image files: downsizing while retain original color model; choose directory and all images are rescaled and put in a new directory.
 
-#Prepress
+# Prepress
 Download the released zip and unzip, place prepress folder in directory (I use Documents/scripts directory). 
 
 **Requirements**
