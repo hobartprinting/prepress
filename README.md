@@ -24,10 +24,12 @@ The actions (or commands) that 'prepress' executes are the ones that we use in o
  
 **Requirements**
 1. tcl/tk runtime
-   - **Windows: tclkit.exe runtime is included in download No further action required in step 1**
+   - **Windows: tclkit.exe runtime is included in download No further action required in step 1**\
+     <ins>*Double click file startPrepressTclKit.bat*</ins>
      - note: tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp as magicsplat's install
      - Or http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
-     - Or download for system wide tcl/tk** https://www.magicsplat.com/tcl-installer/
+     - Or download for system wide tcl/tk** https://www.magicsplat.com/tcl-installer/ \
+       <ins>*Double click file startPrepressTclSystem.bat*</ins>
    - **MacOS: Use tclkit-mac runtime included in download - No further action required in step 1**
      - tclkit-mac (ver 8.6.10 amd64) runs perfectly 
        - **Or download** from MacPorts https://macports.org
