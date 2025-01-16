@@ -1,7 +1,7 @@
 # Prepress
-Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
+Note: The BSD-3 clause applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
 
-TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
+TCL/TK, Ghostscript, Imagemagick, Java, and PdfBox have their own copyrights.
 
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 
@@ -10,10 +10,10 @@ When the script is first launched it checks the presence for the open source too
 Therefore not all of the below requirements need to be present. 
 **To make the best use of our prepress workflow we recommend at having ghostscript and imagemagick installed.**
 
-This application/script makes it easy to use opensource commands without escaping as when one uses a shell such as mac terminal or bash.
-By having a GUI and file dialogs it is much faster to use than using the command line.
+This application/script makes it easy to use opensource commands without escaping as when one would have to do using a shell such as mac terminal or bash.\
+By having a GUI and file dialogs it is much faster and easier to use cli commands than using the 'shell' or likes of 'cmd.exe' .
 
-The actions (or commands) that 'prepress' executes are the ones that we use in our print production workflows.\
+The actions (or commands) that 'prepress' executes are the ones that we most use in our print production workflows.\
 **Examples**
  - soft proofing: receiving a pdf; rasterizing it; creating a cmyk color model tiff file; wrapping the tiff into a pdf by using 'image to pdf' in menu.
    This is a 2 step process and in in future will add process to 1 menu item.
@@ -28,10 +28,13 @@ The actions (or commands) that 'prepress' executes are the ones that we use in o
      <ins>*Double click file startPrepressTclKit.bat*</ins>
      - note: tclkit.exe (ver 8.6.12 amd64) runs perfectly but the fonts are not as sharp as magicsplat's install
      - Or http://kitcreator.rkeene.org/kitcreator  to create your own tclkit
-     - Or download for system wide tcl/tk** https://www.magicsplat.com/tcl-installer/ \
+     - Or download for system wide tcl/tk  https://www.magicsplat.com/tcl-installer/ \
        <ins>*Double click file startPrepressTclSystem.bat*</ins>
    - **MacOS: Use tclkit-mac runtime included in download - No further action required in step 1**
-     - tclkit-mac (ver 8.6.10 amd64) runs perfectly 
+     <ins>*Double click file prepress.command*</ins>\
+     Or <ins>*Double click file prepress*</ins> If the file extension is hidden\
+     For the above to work however you must open **terminal** and cd into prepress directory and type **chmod +x ./prepress.command**\     
+     - tclkit-mac (ver 8.6.10 amd64) runs perfectly
        - **Or download** from MacPorts https://macports.org
          - If macports not install then choose from site the correct install
          - Then if command line tools not already install them
