@@ -4,10 +4,18 @@ Note: The BSD-3 clause only applies to the files prepress-main.tcl, prepress-pri
 TCL/TK, Ghostscript, Imagemagick, Java have their own copyrights.
 
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
-  - using opensource solutions
+This scirpt/app is using opensource solutions.
+When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
+Therefore not all of the above requirements need to be present.
+
+
+
+This application/script makes it easy to use opensource commands without escaping as when using a shell.
+By having a GUI and file dialogs it is much faster to use than using the command line.
+The actions (or commands) that we use in print production are in the application already.
   
 **Requirements**
-1. tcl/tk
+1. tcl/tk runtime
    - Run time for the prepress script
      - source code https://www.tcl-lang.org/software/tcltk/download.html
    - Windows: tclkit.exe runtime is included in download
@@ -78,14 +86,7 @@ This script/app is a utility to help fine tune, convert, measure coverage, or in
    - used in the creation of vectors from a bitmap (pbm files)
 5. pdfbox - shows the cropbox, mediabox and trimbox data
 
-When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
-Therefore not all of the above requirements need to be present.
 
-
-
-This application/script makes it easy to use opensource commands without escaping as when using a shell.
-By having a GUI and file dialogs it is much faster to use than using the command line.
-The actions (or commands) that we use in print production are in the application already.
 
 
 
