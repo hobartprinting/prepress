@@ -568,12 +568,17 @@ proc checkEnvSettings {} {
 			if {[catch {exec $cmd {*}$cmd_options} result]} {
 				.txt insert end "\tError: $result\n"
 			} else {
+				set i 0
 				set lines [split $result "\n"]
-				if {[llength $lines] > 0} {
-					.txt insert end "\tGhostscript version: [lindex $lines 0]\n"	
-				}
-				if {[llength $lines] > 0} {
-					.txt insert end "\tGhostscript version: [lindex $lines 1]\n"
+				foreach line $lines {
+					if {$i eq 0} {
+						.txt insert end "\tGhostscript version: $line\n"
+					}
+					if {$i > 0} {
+						.txt insert end "\t$line\n"
+					}
+					incr i
+					
 				}
 			}
 		}
@@ -791,12 +796,13 @@ proc checkEnvSettings {} {
 			pdfBoxJarDisable $platform
 		} else {
 			.txt insert end "java present. Path: $result\n"
-			if {[catch {exec {*}"java --version"} result]} {
-				.txt insert end "java version not found : $result\n"
+			puts "result of 'where java' : $result"
+			if {[catch {exec {*}"java --version"} result2]} {
+				.txt insert end "java version not found : $result2\n"
 			} else {
-				.txt insert end "java Version: "
+				.txt insert end "\tVersion: "
 				set i 0
-				foreach item $result {
+				foreach item $result2 {
 					if {$i eq 1} {
 						set num [split $item "."]
 						#puts [lindex $num 0]
@@ -809,6 +815,10 @@ proc checkEnvSettings {} {
 						}
 					}
 					incr i
+				}
+				set lines [split $result2 "\n"]
+				foreach line $lines {
+					.txt insert end "\t$line\n"
 				}
 			}
 		}
@@ -871,13 +881,28 @@ proc checkEnvSettings {} {
 			if {[catch {exec {*}"gs -v"} result]} {
 				.txt insert end "Ghostscript version: Failed\n"
 			} else {
+				set i 0
 				set lines [split $result "\n"]
+				#puts "gs: $result"
+				foreach line $lines {
+					if {$i eq 0} {
+						.txt insert end "\tGhostscript version: $line\n"
+					}
+					if {$i > 0} {
+						.txt insert end "\t$line\n"
+					}
+					incr i
+					
+				}
+				
+				if {0} {
 				if {[llength $lines] > 0} {
 					.txt insert end "\tGhostscript version: [lindex $lines 0]\n"
 				}	
 				if {[llength $lines] > 0} {
 					.txt insert end "\tGhostscript version: [lindex $lines 1]\n"
 				}	
+				} ; #  dead code
 			}
 		}
 					
@@ -1091,7 +1116,7 @@ proc checkEnvSettings {} {
 			if {[catch {exec {*}"java --version"} result]} {
 				.txt insert end "java version not found : $result\n"
 			} else {
-				.txt insert end "java Version: "
+				.txt insert end "\tVersion: "
 				set i 0
 				foreach item $result {
 					if {$i eq 1} {
@@ -1099,7 +1124,7 @@ proc checkEnvSettings {} {
 						#puts [lindex $num 0]
 						if { [lindex $num 0] > 7 } {		
 							#.txt insert end "[lindex $num 0]\n"
-							.txt insert end "\t$item\n"
+							.txt insert end "$item\n"
 						} else {
 							.txt insert end "$item - Need version 8 or greater to run pdfbox.pdf"
 							pdfBoxJarDisable $platform
@@ -1107,6 +1132,23 @@ proc checkEnvSettings {} {
 					}
 					incr i
 				}
+				set lines [split $result "\n"]
+				foreach line $lines {
+					.txt insert end "\t$line\n"
+				}
+				
+				
+				if {0} {
+				if {[llength $lines > 0]} {
+					.txt insert end "\t[lindex $lines 0]"
+				}
+				if {[llength $lines > 1]} {
+					.txt insert end "\t[lindex $lines 1]"
+				}
+				if {[llength $lines > 2]} {
+					.txt insert end "\t[lindex $lines 2]"
+				}
+				} ; #dead code
 			}
 		}
 		
