@@ -126,7 +126,7 @@ Change or create another prepress.command file. \
     #!/bin/sh \
     DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" \
     tclsh $DIR/prepress-main.tcl \
-    exit 0  \
+    exit 0  
   - cd to the directory where this new file exists in terminal and type below \
-    chmod +x ./prepress-sys.command \
+    chmod +x ./prepress-sys.command 
 
