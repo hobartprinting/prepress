@@ -1,4 +1,5 @@
-#!/usr/bin/env tclsh 
+## source file
+
 ## Printer Profile window
 ## Filename: prepress-printers.tcl
 ## Examples of tablelist

@@ -1,5 +1,6 @@
 #!/usr/bin/env tclsh 
-###!/usr/bin/env wish
+# #!/usr/bin/env wish
+
 # Copyright 2008 Randall J Hobart
 # Prepress-1.0.0  
 #   Java Version -began: 2008
@@ -109,6 +110,8 @@
 # 	printer IQueImpress is idle.  enabled since Mon Mar 18 19:17:42 2024
 # 	printer IQueue_Server is idle.  enabled since Fri Dec 13 16:17:39 2024
 # 	system default destination: IQueue_Server
+# Changes
+#	added 3 menu items - convert->Open PDF extract images ; extract raw text ; extract layout text - 1-31-25
 
 package require Tk
 package require msgcat
@@ -141,6 +144,7 @@ set b_magick ""   ; # "true" or "false" a string
 set potrace "potrace" ; #mac and linux
 
 set pdfinfo "pdfinfo" ; # part of poppler utilites
+set pdffonts "pdffonts" ; # part of poppler utilities
 
 # dpi used in creating separated tiffs
 set dpi 1200 ; # default, but user preference will take over
@@ -238,8 +242,17 @@ proc creategui {} {
 		-command "openPSCreatePDF"		
 	.mbar.convert add command -label [msgcat::mc "m_openPDFCreatePS"] \
 		-command "openPDFCreatePS"
+	.mbar.convert add command -label [msgcat::mc "m_openPDFCreateVectorPDF"] \
+		-command "openPdfCreateVectorPdf"
 	.mbar.convert add command -label [msgcat::mc "m_openPDFCreateGrayscalePDF"] \
-		-command "openPDFCreateGrayscalePDF"	
+		-command "openPDFCreateGrayscalePDF"
+	.mbar.convert add separator
+	.mbar.convert add command -label [msgcat::mc "m_openPDFpdfimages"] \
+		-command "openPDFpdfimages"
+	.mbar.convert add command -label [msgcat::mc "m_openPDFrawText"] \
+		-command "openPDFpdftotext -raw"
+	.mbar.convert add command -label [msgcat::mc "m_openPDFlayoutText"] \
+		-command "openPDFpdftotext -layout"
 	
 	.mbar add cascade -label [msgcat::mc "m_Identify"] -menu .mbar.identify -underline 0
 	menu .mbar.identify
@@ -247,8 +260,12 @@ proc creategui {} {
 		-command "openImagePdfEpsInfoAll"
 	.mbar.identify add command -label [msgcat::mc "m_openImagePdfEpsInfoSummary"] \
 		-command "openImagePdfEpsInfoSummary"
+	.mbar.identify add separator
 	.mbar.identify add command -label [msgcat::mc "m_openPdfPsPdfinfo"] \
 		-command "openPdfPsPdfinfo"
+	.mbar.identify add command -label [msgcat::mc "m_openPdffonts"] \
+		-command "openPdffonts"
+	.mbar.identify add separator
 	.mbar.identify add command -label [msgcat::mc "m_openPdfBoxJar"] \
 		-command "openPdfBoxJar"
 	
@@ -769,7 +786,7 @@ proc checkEnvSettings {} {
 		set cmd_pdfinfo "where pdfinfo"
 		set pdfinfo_found "true"
 		set pdfinfo_location $globalparms(cache_path)[file separator]$globalparms(pdfinfo_location_file)
-		if {[catch {exec {*}$cmd_pdfinfo > $potrace_location} result]} {
+		if {[catch {exec {*}$cmd_pdfinfo > $pdfinfo_location} result]} {
 			.txt insert end "pdfinfo not found: $result\n"
 			set pdfinfo_found "false"
 			.txt insert end "\tpdfinfo is part of the poppler utilities: http://poppler.freedesktop.org\n"
@@ -1178,6 +1195,7 @@ proc ghostscriptDisable {varOS} {
 	.mbar.convert entryconfigure [msgcat::mc "m_openImageCreatePDF"] -state disable ; # this proc needs both gs and magick
 	.mbar.convert entryconfigure [msgcat::mc "m_openPSCreatePDF"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openPDFCreatePS"] -state disable
+	.mbar.convert entryconfigure [msgcat::mc "m_openPDFCreateVectorPDF"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openPDFCreateGrayscalePDF"] -state disable
 	.mbar.identify entryconfigure [msgcat::mc "m_openImagePdfEpsInfoSummary"] -state disable
 	.mbar.identify entryconfigure [msgcat::mc "m_openImagePdfEpsInfoAll"] -state disable
@@ -1204,6 +1222,8 @@ proc potraceDisable {varOS} {
 }
 proc popplerDisable {varOS} {
 	.mbar.identify entryconfigure [msgcat::mc "m_openPdfPsPdfinfo"] -state disable
+	.mbar.identify entryconfigure [msgcat::mc "m_openPdffonts"] -state disable ; # added 1-17-25
+	.mbar.identify entryconfigure [msgcat::mc "openPDFpdfimages"] -state disable ;
 	puts "OS: $varOS : pdfinfo not present"
 }
 proc pdfBoxJarDisable {varOS} {
@@ -1536,7 +1556,7 @@ proc openTIFFandInvert {} {
 	} else {
 		.txt insert end "File created: [file tail $outputFile]\n"
 	}
-	.txt insert end "Directory: "
+	.txt insert end "Directory: \n"
 	.txt insert end "$filedir" dirHyperlink
 	.txt insert end "\n"
 	.txt insert end "$LINE" lineColor
@@ -2088,11 +2108,58 @@ proc openPDFCreatePS {} {
 	#exec {*}$cmd >>& /dev/tty
 }
 
+# 1-17-2025
+# open PDF Create Vector PDF
+proc openPdfCreateVectorPdf {} {
+	global gs
+	global LINE
+	set types {
+		{Files {.pdf .ps}}
+		{PDF .pdf}
+	}
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPDFCreateGrayscalePDF\n" procColor
+	set introVar "Opens a pdf file and converts fonts into vector\n"
+	.txt insert end $introVar
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	if {$filename eq ""} {
+		.txt insert end "Canceled\n"
+		.txt insert end "$LINE" lineColor
+		return
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	
+	set fileroot [file rootname [file tail $filename]] ; #return file no extension of dir
+	set filedir [file dir $filename] ; #returns the path without the tailing /
+	set outputFile "$filedir[file separator]$fileroot-vector.pdf"
+	set outputFile [file nativename $outputFile] ; # normalize using windows and not excaped
+	
+	set cmd "$gs"
+	set cmd_options [list -dNoOutputFonts -sDEVICE=pdfwrite  -o $outputFile -f $filename]
+	.txt insert end "cmd: $gs\n"
+	.txt insert end "options: $cmd_options\n"
+	
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"	
+	} else {
+		.txt insert end "Result of gs: $result\n" 
+		.txt insert end "File created: [file tail $outputFile]\n" 
+	}
+	.txt insert end "Directory: "
+	.txt insert end "$filedir" dirHyperlink
+	.txt insert end "\n"
+	.txt insert end "$LINE" lineColor
+}
+
 # 2-26-23 put options into a list and surround by catch statement
+# 1-22-25 changed method of converting to grayscale pdf by 
+#	      first creating a grayscale PS file, and then creating a pdf from that PS file
 # Windows Ready
 proc openPDFCreateGrayscalePDF {} {
 	global gs
 	global LINE
+	global b_magick
 	set types {
 		{Files {.pdf .ps}}
 		{PDF .pdf}
@@ -2114,39 +2181,62 @@ proc openPDFCreateGrayscalePDF {} {
 	
 	set fileroot [file rootname [file tail $filename]] ; #return file no extension of dir
 	set filedir [file dir $filename] ; #returns the path without the tailing /
-	set escaped_outputFile [escapePath "$filedir[file separator]$fileroot-grayscale.pdf"] ; #escapes spaces in path and filename
-	set escaped_filename [escapePath $filename] ; #escaped path and filename
+	
+	# for creating pdf from mono file
 	set outputFile "$filedir[file separator]$fileroot-grayscale.pdf"
 	set outputFile [file nativename $outputFile] ; # normalize using windows and not excaped
 	
-	set cmd "$gs"
-	set cmd_options [list -o $outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray -f $filename]
-	#set cmd_options "-o $outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray $filename"
+	# For creating PS file
+	set outputFilePS "$filedir[file separator]$fileroot-converted.ps"
+	set outputFilePS [file nativename $outputFilePS]
 	
-	### note: Had to escape the file names in order for this to work consistently ?????? #########
-	#set cmd_options "-o $escaped_outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray $escaped_filename"
+	set cmd "$gs"
+	#set cmd_options [list -o $outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray -f $filename]
+	#the ps file - the conversions strategy did not seem change the color model however using this made below conversion to pdf more accurate in gray-scaling pdf
+	set cmd_options [list -o $outputFilePS -sDEVICE=ps2write -sProcessColorModel=DeviceGray -dEPSCrop -f $filename]
 	.txt insert end "cmd: $gs\n"
 	.txt insert end "options: $cmd_options\n"
 	if {[catch {exec $cmd {*}$cmd_options} result]} {
 		.txt insert end "Error: $result\n"	
 	} else {
 		.txt insert end "Result of gs: $result\n" 
+		.txt insert end "File created: [file tail $outputFilePS]\n" 
+	}
+	set cmd_options [list -o $outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray -f $outputFilePS]
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"	
+	} else {
+		.txt insert end "Result of gs: $result\n" 
 		.txt insert end "File created: [file tail $outputFile]\n" 
 	}
+	
+	# try imageMagick
+	# For creating PS mono file
+	if {$b_magick eq "true"} {
+		set outputFileMagick "$filedir[file separator]$fileroot-magick.pdf"
+		set outputFileMagick [file nativename $outputFileMagick]
+		set cmd "convert"
+		# file sizes to big for density of 300
+		#set cmd_options [list -colorspace GRAY -density 300 $filename $outputFileMagick]
+		set cmd_options [list -colorspace GRAY $filename $outputFileMagick]
+		if {[catch {exec $cmd {*}$cmd_options} result]} {
+			.txt insert end "Error: $result\n"	
+		} else {
+			.txt insert end "Result of gs: $result\n" 
+			.txt insert end "File created: [file tail $outputFileMagick]\n" 
+		}
+	}
+	
+	# delete the temp PS file
+	if {[file isfile $outputFilePS]} {
+		file delete -force $outputFilePS
+		.txt insert end "intermediate temp PS (postscript) file deleted: [file tail $outputFilePS]\n"
+	}
+	
 	.txt insert end "Directory: "
 	.txt insert end "$filedir" dirHyperlink
 	.txt insert end "\n"
 	.txt insert end "$LINE" lineColor
-	
-	#set cmd "ps2pdf -sPAPERSIZE=letter -dProcessColorModel=/DeviceGray -dMaxSubsetPct=100 -dCompatibilityLevel=1.4 -dSubsetFonts=true -dEmbedAllFonts=true -dAutoFilterColorImages=false -dAutoFilterGrayImages=true -dColorImageFilter=/FlateEncode -dGrayImageFilter=/FlateEncode -dMonoImageFilter=/FlateEncode $escaped_filename $escaped_outputFile"
-	#update on XQuartz 2.8.2 (xorg-server 1.20.14) came up after this command run
-	#set cmd "gs -dQUITE sDevice=pdfwrite -sProcessColorModel=DeviceGray -sColorCoversionStrategy=Gray -dOverrideICC -sOutputFile=$escaped_outputFile $escaped_filename"
-	
-	#### This was latest used before putting options in a list
-	#set cmd "gs -o $escaped_outputFile -sDEVICE=pdfwrite -sColorConversionStrategy=Gray -sProcessColorModel=DeviceGray $escaped_filename"
-	#.txt insert end "cmd: $cmd\n"
-	
-	#exec {*}$cmd >>& /dev/tty
 	
 }
 
@@ -2362,9 +2452,207 @@ proc openPdfPsPdfinfo {} {
 	} else {
 		.txt insert end "$result\n"
 	}
+	.txt insert end "\n"
+	.txt insert end "File inspected: [file tail $filename]\n"
+	.txt insert end "Directory: "
+	.txt insert end "[file dir $filename]" dirHyperlink
+	.txt insert end "\n"
 	
 	.txt insert end "$LINE" lineColor
 }
+# part of poppler operations - added 1/16/25
+proc openPdffonts {} {
+	global pdffonts
+	global LINE
+	
+	set types {
+		{PDF .pdf}
+	}
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPdffonts\n" procColor
+	.txt insert end "This uses pdffonts : To list embedded fonts in pdf files\n"
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	if {$filename eq ""} {
+		.txt insert end "canceled\n"
+		.txt insert end "$LINE" lineColor
+		return 
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	
+	set cmd "$pdffonts"
+	set cmd_options [list $filename]
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"
+		.txt insert end "$LINE" lineColor
+	} else {
+		.txt insert end "$result\n"
+	}
+	
+	.txt insert end "\n"
+	.txt insert end "File inspected: [file tail $filename]\n"
+	.txt insert end "Directory: "
+	.txt insert end "[file dir $filename]" dirHyperlink
+	.txt insert end "\n"
+	
+	.txt insert end "$LINE" lineColor
+}
+# part of poppler operations
+# extract images 1/18/25
+# working - must have an existing directory listed in last argument for the output dir and the prefix of images
+proc openPDFpdfimages {} {
+	global LINE
+	
+	set bImageDir "true"
+	set types {
+		{PDF .pdf}
+	}
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPDFpdfimages\n" procColor
+	.txt insert end "This uses pdfimages : To extract all images in pdf a file\n"
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	if {$filename eq ""} {
+		.txt insert end "canceled\n"
+		.txt insert end "$LINE" lineColor
+		return 
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	set filedir [file dir $filename] ;     #returns the path without the tailing /
+	set fileroot [file rootname [file tail $filename]] ; #returns file no extension or dir
+	set outputdir "$filedir[file separator]$fileroot-extracted-images" ; # new directory
+	set outputdir [file nativename $outputdir]
+	
+	# make sure the directory exists or create one
+	if {![file isdirectory $outputdir]} {
+		file mkdir $outputdir
+		set bImageDir "true"
+	}
+	
+	set cmd {pdfimages}
+	set cmd_options [list -print-filenames -all $filename "$outputdir/img-prefix"]
+	
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"
+		.txt insert end "$LINE" lineColor
+	} else {
+		.txt insert end "$result\n"
+		puts $::errorInfo
+	}
+	
+	#check for Files
+	set files [glob -nocomplain -dir $outputdir *img*]
+	set i 0
+	foreach f $files {
+		#count files
+		incr i
+	}
+	if {$i eq 0} {
+		.txt insert end "\nNo images created\n"
+		#delete directory
+		# make sure the directory exists 
+		if {[file isdirectory $outputdir]} {
+			file delete -force $outputdir
+			set bImageDir "false" 
+		}
+	}
+	if {$i > 0} {
+		.txt insert end "\n$i images created.\n"
+	}
+	.txt insert end "File inspected: [file tail $filename]\n"
+	.txt insert end "Parent Directory: "
+	.txt insert end "[file dir $filename]" dirHyperlink
+	.txt insert end "\n"
+	
+	if {$bImageDir eq "true"} {
+		.txt insert end "Image Directory: "
+		.txt insert end "$outputdir" dirHyperlink
+		.txt insert end "\n"
+	}
+	.txt insert end "$LINE" lineColor
+}
+# part of poppler operations
+# data goes to 1 file
+# either -layout or -raw
+proc openPDFpdftotext {optionSwitch} {
+	global LINE
+	
+	# optionSwitch is -layout or -raw
+	set types {
+		{PDF .pdf}
+	}
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPDFpdftotext\n" procColor
+	.txt insert end "This uses pdftotext : To extract all text in pdf a file using switch $optionSwitch\n"
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	if {$filename eq ""} {
+		.txt insert end "canceled\n"
+		.txt insert end "$LINE" lineColor
+		return 
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	set filedir [file dir $filename] ; #returns path without trailing /
+	set fileroot [file rootname [file tail $filename]] ; # returns file no extension or dir
+	set outfile "$filedir[file separator]$fileroot$optionSwitch.txt"
+	
+	set cmd {pdftotext}
+	#set cmd_options [list -layout $filename "/Users/studio/Documents/images/text.txt"]
+	set cmd_options [list $optionSwitch $filename $outfile]
+	
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"
+		.txt insert end "$LINE" lineColor
+	} else {
+		#.txt insert end "$result\n"
+		#puts $::errorInfo
+	}
+	
+	.txt insert end "File created: [file rootname $outfile]\n"
+	.txt insert end "Parent Directory: "
+	.txt insert end "[file dir $filename]" dirHyperlink
+	.txt insert end "\n"
+	
+	.txt insert end "$LINE" lineColor
+}
+# part of poppler operations
+# data needs a directory
+proc openPDFpdftohtml {} {
+	global LINE
+	
+	set types {
+		{PDF .pdf}
+	}
+	.txt insert end "$LINE" lineColor
+	.txt insert end "proc openPDFpdftohtml\n" procColor
+	.txt insert end "This uses pdfimages : To extract all images in pdf a file\n"
+	
+	set filename [tk_getOpenFile -filetypes $types]
+	if {$filename eq ""} {
+		.txt insert end "canceled\n"
+		.txt insert end "$LINE" lineColor
+		return 
+	}
+	set filename [file nativename $filename] ; # for windows over the network
+	
+	set cmd {pdftohtml}
+	set cmd_options [list -p -noframes -xml $filename "/Users/studio/Documents/images/text.html"]
+	
+	if {[catch {exec $cmd {*}$cmd_options} result]} {
+		.txt insert end "Error: $result\n"
+		.txt insert end "$LINE" lineColor
+	} else {
+		.txt insert end "$result\n"
+		puts $::errorInfo
+	}
+	
+	.txt insert end "Directory: "
+	.txt insert end "[file dir $filename]" dirHyperlink
+	.txt insert end "\n"
+	
+	.txt insert end "$LINE" lineColor
+}
+
 
 # opens pdf file using pdfbox.jar
 # https://pdfbox.apache.org/
@@ -2939,13 +3227,13 @@ proc measureCMYK {} {
 				set box [string range $mediabox $start+1 $end-1]
 				set box [string trim $box]
 				set list_box [split $box " "]
-				puts $list_box
+				#puts $list_box
 				if {[llength $list_box] == 4} {
 					set x1 [expr round([lindex $list_box 0])]
 					set y1 [expr round([lindex $list_box 1])]
 					set x2 [expr round([lindex $list_box 2])]
 					set y2 [expr round([lindex $list_box 3])]
-					puts "$x1 $y1 $x2 $y2"
+					#puts "$x1 $y1 $x2 $y2"
 					set result ""
 					if {[catch {expr ($x2-$x1)/72.0} result]} {
 						set width 0 ; #error occured
@@ -3983,7 +4271,6 @@ set script_path [ file dirname [ file normalize [ info script ] ] ]
 puts "script_path: $script_path"
 lappend auto_path "$script_path/lib/"
 #lappend auto_path "$script_path/lib/tablelist"
-
 #lappend auto_path "$script_path/lib/sqlite3"
 
 initParams
