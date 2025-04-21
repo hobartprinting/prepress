@@ -22,11 +22,16 @@ msgcat::mcflmset {
 	"m_openImageCreatePDF" {Open Image and Create PDF...}
 	"m_openPSCreatePDF" {Open PS and Create PDF...}
 	"m_openPDFCreatePS" {Open PDF and Create PS...}
+	"m_openPDFCreateVectorPDF" {Open PDF and Create -fonts outlined- PDF...}
 	"m_openPDFCreateGrayscalePDF" {Open PDF or PS and Create Grayscale PDF...}
+	"m_openPDFpdfimages" {Open PDF and extract images...}
+	"m_openPDFrawText" {Open PDF and extract text raw...}
+	"m_openPDFlayoutText" {Open PDF and extract text layout...}
 	"m_Identify" {Inspect}
 	"m_openImagePdfEpsInfoAll" {Identify-Open Image/PDF/EPS -ALL)...}
 	"m_openImagePdfEpsInfoSummary" {Identify-Open Image/PDF/EPS summary...}
 	"m_openPdfPsPdfinfo" {pdfinfo-Open PDF show Media Sizes...}
+	"m_openPdffonts" {pdffonts-Open PDF show Embedded Fonts...}
 	"m_openPdfBoxJar" {PdfBox - Open PDF and Display Inspection...}
 	"m_Vector" {Vector}
 	"m_openBitmapPBMCreatePS" {Open .pbm file and Create Vector file...}
