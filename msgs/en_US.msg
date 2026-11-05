@@ -1,5 +1,6 @@
 #using message catalogs
 #randall hobart started on 8-20-2023
+# change 2026-11-03 added new menu item - m_open4imagesCreateCMYK
 
 msgcat::mcflmset {
 	"title"	{PrePressActions}
@@ -7,10 +8,12 @@ msgcat::mcflmset {
 	"m_clearLog"	{Clear Logging Information}
 	"m_WrapLines"	{Wrap Lines}
 	"m_UnWrapLines"	{UnWrap Lines}
+	"m_CUPS" {CUPS print and info commands...}
 	"m_quit"	{Exit Ctl-x}
 	"ConvertFile" {ConvertFile}
 	"m_showDpiDialog" {Set DPI preference...}
 	"m_openPDFtoTiff" {Open PDF,EPS,PS and Separate to cmyk + spot tiffs...}
+	"m_open4imagesCreateCMYK" {Select 4 grayscale images + create CMYK tiff...}
 	"m_openImagetoMono" {Open Image and Create mono Bitmap create tiff...}
 	"m_openTIFFandInvert" {Open Image and Invert -negate create tiff...}
 	"m_showSwellDialog" {Set Swell size...}
