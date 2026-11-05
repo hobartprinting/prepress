@@ -1,17 +1,17 @@
 # Introduction
-Note: The BSD-3 clause applies to the files prepress-main.tcl, prepress-printers.tcl, and file en_US.msg in msgs directory. 
+Note: The BSD-3 clause applies to the files prepress-main.tcl, prepress-printers.tcl, prepress-createCMYK.tcl and file en_US.msg in msgs directory. 
 
 TCL/TK, Ghostscript, Imagemagick, Java, and PdfBox have their own copyrights.
 
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
 
-This scirpt/app uses opensource solutions.\
+This script/app uses opensource solutions.\
 When the script is first launched it checks the presence for the open source tools such as ghostscript or imagemagick and if not present disables the menu items that need them.
 Therefore not all of the below requirements need to be present. 
 **To make the best use of our prepress workflow we recommend at having ghostscript and imagemagick installed.**
 
 This application/script makes it easy to use opensource commands without escaping as when one would have to do using a shell such as mac terminal or bash.\
-By having a GUI and file dialogs it is much faster and easier to use cli commands than using the 'shell' or likes of 'cmd.exe' .
+By having a GUI and file dialogs it is much faster and easier to use cli commands rather than using the 'shell' or likes of 'cmd.exe' .
 
 The actions (or commands) that 'prepress' executes are the ones that we most use in our print production workflows.\
 **Examples**
@@ -24,6 +24,9 @@ The actions (or commands) that 'prepress' executes are the ones that we most use
 
 # Prepress
 Download the released zip and unzip, place prepress folder in directory (I use Documents/scripts directory). 
+Version 1.1.3 on 11/5/2026 added support for CUPS and creating CMYK.tiff files by merging 4 grayscale files.
+ CUPS on the macOS has been tested; windows must have CUPS installed.
+ Should run under linux but has not been tested.
 
 **Requirements**
 1. tcl/tk runtime
