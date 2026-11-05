@@ -23,10 +23,10 @@ The actions (or commands) that 'prepress' executes are the ones that we most use
  - batch processing image files: downsizing while retain original color model; choose directory and all images are rescaled and put in a new directory.
 
 # Prepress
-Download the released zip and unzip, place prepress folder in directory (I use Documents/scripts directory). 
-Version 1.1.3 on 11/5/2026 added support for CUPS and creating CMYK.tiff files by merging 4 grayscale files.
- CUPS on the macOS has been tested; windows must have CUPS installed.
- Should run under linux but has not been tested.
+Download the released zip and unzip, place prepress folder in directory (I use Documents/scripts directory). \
+Version 1.1.3 on 11/5/2026 added support for CUPS and creating CMYK.tiff files by merging 4 grayscale files.\
+ CUPS on the macOS has been tested; windows must have CUPS installed.\
+ Should run under linux but has not been tested.\
 
 **Requirements**
 1. tcl/tk runtime
