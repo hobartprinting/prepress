@@ -2,7 +2,7 @@
 Note: The BSD-3 clause applies to the files prepress-main.tcl, prepress-printers.tcl, prepress-createCMYK.tcl and file en_US.msg in msgs directory. \
  Copyright BSD PrePressActions: 2019-12-27 - 2026 Hobart Printing LLC\
  Copyright BSD Inkcoverage Portion:  2008 - 2026 Hobart Printing LLC\
-     Current version 1.1.3 2026/5/11
+** Prepress Actions    Current version 1.1.3 2026/5/11\
 TCL/TK, Ghostscript, Imagemagick, Java, and PdfBox have their own copyrights.
 
 This script/app is a utility to help fine tune, convert, measure coverage, or inspect files that will be sent to a press or printer.
