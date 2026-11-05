@@ -45,7 +45,7 @@ if {[catch {toplevel .printers } result]} {
 	.txt insert end "Info: $result\n"
 	.txt insert end "$LINE" lineColor
 	wm attributes .printers -topmost true
-	wm attributes .printers -topmost false
+	#wm attributes .printers -topmost false
 	return
 }
 wm title .printers {Printer Profiles}
@@ -135,7 +135,10 @@ if {[tk windowingsystem] == "aqua"} {
 	bind .printers <ButtonPress-3> {tk_popup $mp %X %Y}
 }
 
-
+# make invisable
+wm protocol .printers WM_DELETE_WINDOW {
+	wm withdraw .printers
+}
 
 proc printerSelected {w} {
 	global rowSelected
@@ -340,6 +343,9 @@ proc savePrinters {} {
 	puts $channel $dict_printers
 	close $channel
 }
+# this was put in here because originally the window was destroyed on closing and needed to be reopened 
+#	if it was opened once and then closed
+#	This dict was opened at the very beginning of the prepress launch and is a global var.
 proc openPrinters {} {
 	global globalparms
 	global dict_printers
@@ -1875,4 +1881,7 @@ proc showNewProfileDialog {} {
 }
 
 # if the printer profiles have been saved this will open the file and replace the initial demo printers
+# the earlier program the profile window was destroyed, and the dict may have changed
+# will leave this here in case of an older version of prepress
+# upon openning the prepress app if a file exists of profiles in is opened and initalized and put in globar var 
 openPrinters ; # this will replace the initial demo printers and create a whole new dict_printers

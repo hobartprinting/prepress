@@ -1,11 +1,13 @@
 #!/usr/bin/env tclsh 
 # #!/usr/bin/env wish
 
-# Copyright 2008 Randall J Hobart
-# Prepress-1.0.0  
+# Copyright BSD Inkcoverage Portion:  2008 Hobart Printing LLC
+# Copyright BSD PrePressActions: 2019-12-27 Hobart Printing LLC
+# Prepress-1.1.3  
 #   Java Version -began: 2008
 #   Objective-C Version: 2008
-#	Tcl.Tk Version began: 12-27-2019
+#	Tcl.Tk Version began: 2019-12-27
+#	Last Change made: 2026-01-26
 # 	Main Features: 
 #		Measuring ink coverage based on print/art size
 #		Applying those measurements with the expected consumable costs of the printing machine
@@ -40,6 +42,8 @@
 #       https://www.imagemagick.org/Usage/transform/#edge
 #       https://www.imagemagick.org/Usage/morphology/#edge
 #		https://www.imagemagick.org/Usage/transform/
+#		https://stackoverflow.com/questions/24935837/how-to-create-cmyk-color-seperation-combinations-using-ghostscript
+#			example: convert 11637-c.tiff 11637-m.tiff 11637-y.tiff 11637-k.tiff -set colorspace CMYK -negate -combine cmyk-LH.tiff
 #	Links on poppler operations - which include pdfinfo used for information of pdf such as artbox and bleedbox
 #		https://www.prepressure.com/pdf/basics/page-boxes
 #		https://www.cyberciti.biz/faq/linux-unix-view-technical-details-of-pdf/    - this as instructions on how to use
@@ -112,6 +116,16 @@
 # 	system default destination: IQueue_Server
 # Changes
 #	added 3 menu items - convert->Open PDF extract images ; extract raw text ; extract layout text - 1-31-25
+#	2026-01-26 started to add CUPS - send raw pdf or png or tiff to CUPS printer - or - print Server - our ique printserver 
+#		Also to add menu items to query the printers to help write custom printer options.
+#		Will provide same commands
+#		Step 1 : test for installment
+# Changes - 2026-11-03
+#	add 1 menu item - -command "open4imagesCreateCMYK"
+#	Purpose:
+#		To select 4 grayscale images and create 1 CMYK image tiff
+#		example command is : convert 11637-c.tiff 11637-m.tiff 11637-y.tiff 11637-k.tiff -set colorspace CMYK -negate -combine cmyk-LH.tiff
+#			Will provide dialog box in which to select the correct grayscale for each channel color
 
 package require Tk
 package require msgcat
@@ -119,11 +133,12 @@ package require msgcat
 # load message catalogs - Do this at bottom of script - after initParams before creategui
 #msgcat::mclocale en_US
 #msgcat::mcload [file join [file dirname [info script]] msgs]
-
 #ttk::style theme use classic
-## Global Vars
-# ghostscript
 
+## Global Vars
+set prepress_version "1.1.3 11/5/2026" ; # started versioning here on 11/5/26
+
+# ghostscript
 set gs "gs" ; # for mac, bsd, and linux name stays the same; on windows gs will have name of exe
 set pdf2ps "pdf2ps"
 set ps2pdf "ps2pdf"
@@ -145,6 +160,11 @@ set potrace "potrace" ; #mac and linux
 
 set pdfinfo "pdfinfo" ; # part of poppler utilites
 set pdffonts "pdffonts" ; # part of poppler utilities
+
+####CUPS implementation
+set b_cups "" ; # "true" or "false" a string
+set dict_cupscmd {} ; # store cup commands - nested 1 dict
+############ End CUPS
 
 # dpi used in creating separated tiffs
 set dpi 1200 ; # default, but user preference will take over
@@ -199,6 +219,11 @@ proc creategui {} {
 		-command {.txt configure -wrap word; wrapLinesDisable; unwrapLinesEnable }
 	.mbar.files add command -label [msgcat::mc "m_UnWrapLines"] -state disable \
 		-command {.txt configure -wrap none; unwrapLinesDisable; wrapLinesEnable }
+	.mbar.files add separator
+	.mbar.files add command -label [msgcat::mc "m_CUPS"] \
+		-underline 0 \
+		-command "showCUPSwin"
+	.mbar.files add separator
 	.mbar.files add command -label [msgcat::mc "m_quit"] \
 		-command "quit"
 	
@@ -210,7 +235,10 @@ proc creategui {} {
 		-command "showDpiDialog"
 	.mbar.convert add command -label [msgcat::mc "m_openPDFtoTiff"] \
 		-underline 0 \
-		-command "openPDFtoTiff"	
+		-command "openPDFtoTiff"
+	.mbar.convert add command -label [msgcat::mc "m_open4imagesCreateCMYK"] \
+		-underline 0 \
+		-command "open4imagesCreateCMYK"
 	.mbar.convert add separator
 	.mbar.convert add command -label [msgcat::mc "m_openImagetoMono"] \
 		-underline 0 \
@@ -369,11 +397,13 @@ proc initParams {} {
 	set globalparms(pdfinfo_location_file) "pdfinfo_location_file.txt" ; # from poppler http://poppler.freedesktop.org
 	set globalparms(prepress_parms_file) "prepress_parms.txt" ; # file that contains all globalparms array - for saving this array settings
 	set globalparms(printers_inkcoverage) "printers_inkcoverage.txt" ; #file that contains all the printers for inkcoverage operations
+	set globalparms(cups_commands) "cups_commands.txt" ; #file that contains all the saved ups printer commands
 	
 	## initialize a set of demo printers to start. This can be overwritten on the save file
 	# First create a printer, then add to the global dict that contains all the printers
 	######## kind should be 1 of these 3 options: "Color Toner" "Mono Toner" "Ink Jet" #####################
 	global dict_printers ; #will store all printers to be used in the inkcoverage portion
+	global dict_cupscmd
 	
 	#Example EN/PRESS
 	set printerColorLaser [dict create \
@@ -466,11 +496,37 @@ proc initParams {} {
 		dict append dict_printers 2 $printerMonoLaser
 		dict append dict_printers 3 $printerInkJet		
 		#puts "init: $dict_printers"
+		
+		#example cups
+		set option1 [dict create \
+			"name" "cmd-1 9800-Plate" \
+			"cmd" "lpr" \
+			"options" "-P IQueue_Server2 -o option=raw media=Custom.12x19.38in" \
+			"filetypes" "ps,pdf" ]
+			
+		set option2 [dict create \
+			"name" "cmd-2 List Printers" \
+			"cmd" "lpstat" \
+			"options" "-p" \
+			"filetypes" "none" ]
+			
+		set option3 [dict create \
+			"name" "cmd-3 Brother" \
+			"cmd" "lpr" \
+			"options" "-P Brother_HL_L2320D_Randy -o media=Letter" \
+			"filetypes" "ps,pdf" ]
+			
+		dict append dict_cupscmd 1 $option1
+		dict append dict_cupscmd 2 $option2
+		dict append dict_cupscmd 3 $option3
+		#puts "dict_cupscmd $dict_cupscmd"
 }
 # check if ghostscript, imagemagick and utilities are prescent
+# this is checked last, at the end of the gui call
 proc checkEnvSettings {} {
 	global globalparms
 	global dict_printers ; # the printers used for inkcoverage
+	global dict_cupscmd ; # the cups commands
 	global gs
 	global convert
 	global composite
@@ -480,6 +536,8 @@ proc checkEnvSettings {} {
 	global b_magick_7
 	global b_magick_6
 	global b_magick
+	global b_cups
+	global prepress_version
 	set platform ""
 	# if dir exists will do nothing else creates the dir
 	if {[catch {file mkdir $globalparms(cache_path)} result]} {
@@ -516,9 +574,38 @@ proc checkEnvSettings {} {
 		set dict_printers [read $channel]
 		close $channel
 	}
-	
+	# prepress version
+	.txt insert end "PrePressActions version: $prepress_version\n"
+	.txt insert end "\tCopyright BSD PrePressActions: 2019-12-27 Hobart Printing LLC\n"
+	.txt insert end "\tCopyright BSD Inkcoverage Portion:  2008 Hobart Printing LLC\n"
+	.txt insert end "\thttps://github.com/hobartprinting/prepress\n"
+	.txt insert end "\thttps://hobartprinting.com\n"
+	.txt insert end "\t * Support * https://www.hobartprinting.com/contact-us/\n"
+	.txt insert end "\t * Can install or train for a fee; will quote\n"
 	# find tcl version
 	.txt insert end "Tclversion: [info patchlevel] Encoding: [encoding system]\n"
+	
+	### find CUPS
+	# May need to sub system if using windows for cups install
+	if {[catch {exec {*}"cups-config --version"} result]} {
+		.txt insert end "CUPS not present. \n"
+		set b_cups "false"
+		cupsDisable ; # disable the cups menu item
+	} else {
+		set b_cups "true"
+		puts "CUPS: $result\n"
+		.txt insert end "CUPS version: $result\n"
+	}
+	
+	# see if file exits for the cups commands
+	# if cups is not installed or if the default commands are never changed then this file will not exist
+	set cupsFile $globalparms(cache_path)[file separator]$globalparms(cups_commands)
+	if {[file exists $cupsFile]} {
+		set channel [open $cupsFile r]
+		fconfigure $channel -translation lf -encoding utf-8
+		set dict_cupscmd [read $channel]
+		close $channel
+	}
 	
 	# windows fails with the "which" command line app - "where" works for windows
 	# windows may need to be manually setup for command line apps
@@ -791,6 +878,7 @@ proc checkEnvSettings {} {
 			set pdfinfo_found "false"
 			.txt insert end "\tpdfinfo is part of the poppler utilities: http://poppler.freedesktop.org\n"
 			.txt insert end "\thttps://www.xpdfreader.com/download.html - another way to get poppler utilities\n"
+			.txt insert end "\t\tUse the links under heading: Download the Xpdf command line tools\n"
 		} else {
 			if { [file exists $pdfinfo_location] } {
 				set channel [open $pdfinfo_location r]
@@ -1121,6 +1209,7 @@ proc checkEnvSettings {} {
 			popplerDisable $platform
 			.txt insert end "\tpdfinfo: failed to get path or location. Not installed.\n"
 			.txt insert end "\tpdfinfo: utilities from poppler; http://poppler.freedesktop.org\n"
+			.txt insert end "\t\tUse the links under heading: Download the Xpdf command line tools\n"
 		}
 		
 		## java
@@ -1169,6 +1258,8 @@ proc checkEnvSettings {} {
 			}
 		}
 		
+		
+		
 	} ; # end fo else - must be unix - or mac
 	
 	# if there is an int file then load it from disk
@@ -1203,6 +1294,7 @@ proc ghostscriptDisable {varOS} {
 	puts "OS: $varOS : Ghostscript not present"
 } 
 proc imageMagickDisable {varOS} {
+	.mbar.convert entryconfigure [msgcat::mc "m_open4imagesCreateCMYK"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openImagetoMono"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openTIFFandInvert"] -state disable
 	.mbar.convert entryconfigure [msgcat::mc "m_openTIFFandSwell"] -state disable
@@ -1229,6 +1321,9 @@ proc popplerDisable {varOS} {
 proc pdfBoxJarDisable {varOS} {
 	.mbar.identify entryconfigure [msgcat::mc "m_openPdfBoxJar"] -state disable
 	puts "OS: $varOS : pdfbox.jar or java 8 or above not present"
+}
+proc cupsDisable {} {
+	.mbar.files entryconfigure [msgcat::mc "m_CUPS"] -state disable
 }
 proc wrapLinesDisable {} {
 	.mbar.files entryconfigure [msgcat::mc "m_WrapLines"] -state disable
@@ -1260,6 +1355,7 @@ proc quit {} {
 	
 	exit
 }
+
 
 # WINDOWS ready
 # Purpose: Menu command
@@ -1442,6 +1538,7 @@ proc openPDFtoTiff {} {
 	.txt insert end "$LINE" lineColor
 	.txt insert end "\n"
 }
+
 # Convert the tiff to mono .pbm file to create bilevel 1 bit file
 # Then convert that .pbm file back to tiff
 # menu command
@@ -3764,6 +3861,8 @@ proc escapePath {varPath} {
 		if {[string is space $char]} {
 			#puts "space found" ; #testing
 			set catstr [string cat $catstr "\\" $char]
+		} elseif {$char eq "&"} {
+			set catstr [string cat $catstr "\\" $char]
 		} else {
 			set catstr [string cat $catstr $char]
 		}
@@ -4261,11 +4360,48 @@ proc showPagesizeDlg {} {
 }
 ######## END SIZE DIALOG ########
 
+### Creating new toplevel windows
+
 proc printerProfilesWin {} {
 	global script_path
-	source "$script_path/prepress-printers.tcl"
+	#source "$script_path/prepress-printers.tcl"
+	# command name newProfile is defined in this file
+	# load source once
+	if {[llength [info commands "newProfile"]] > 0 } {
+		wm deiconify .printers	; #show printers
+	} else {
+		source "$script_path/prepress-printers.tcl"
+		puts "source loaded: $script_path/prepress-printers.tcl"
+	}
+}
+
+# Purpose: Menu command and will open the CUPS command window
+proc showCUPSwin {} {
+	global script_path
+	if {[llength [info commands "newCUPScmd"]] > 0 } {
+		wm deiconify .cups	; #show cups window
+	} else {
+		source "$script_path/prepress-cups.tcl"
+		puts "source loaded: $script_path/prepress-cups.tcl"
+	}
+
+}
+
+# Purpose convert 4 grayscale tiffs into 1 cmyk tiff
+# New 2026-11-03
+proc open4imagesCreateCMYK {} {
+	global script_path
+	if {[llength [info commands "showCMYKdlg"]] > 0 } {
+		#wm deiconify .cmykDlg	; #show cups window
+		showCMYKdlg
+	} else {
+		source "$script_path/prepress-createCMYK.tcl"
+		puts "source loaded: $script_path/prepress-createCMYK.tcl"
+		showCMYKdlg
+	}
 	
 }
+
 
 set script_path [ file dirname [ file normalize [ info script ] ] ]
 puts "script_path: $script_path"
