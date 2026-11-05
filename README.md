@@ -29,6 +29,7 @@ Download the released zip and unzip, place prepress folder in directory (I use D
 Version 1.1.3 on 11/5/2026 added support for CUPS and creating CMYK.tiff files by merging 4 grayscale files.\
  CUPS on the macOS has been tested; windows must have CUPS installed.\
  Should run under linux but has not been tested.\
+Ask for quote if help is needed at https://www.hobartprinting.com/contact-us/\
 
 **Requirements**
 1. tcl/tk runtime
